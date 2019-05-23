@@ -1,2 +1,2 @@
 # DEM_generation
-# Master code to download, process, and create DEM.
+# Master script to download, process, and create DEM.
