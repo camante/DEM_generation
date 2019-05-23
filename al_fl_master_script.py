@@ -27,9 +27,6 @@ import glob
 #################################################################
 #################################################################
 
-#testing out git with small change
-print "Testing git"
-
 #set main working directory
 main_dir='/media/sf_external_hd/al_fl'
 os.chdir(main_dir)
