@@ -24,14 +24,6 @@ import os
 import subprocess
 import sys
 import glob
-#from al_fl_master_script import conv_grd_path
-#################################################################
-#################################################################
-#################################################################
-###################### INITIAL VARIABLES ########################
-#################################################################
-#################################################################
-#################################################################
 ######################## USACE DREDGE ###########################
 print "Current directory is ", os.getcwd()
 
@@ -53,6 +45,10 @@ if not os.path.exists('csv'):
 if not os.path.exists('xyz'):
 	os.makedirs('xyz')
 
+
+#print 'Downloading USACE Channel Surveys'
+#usace_download_cmd='usacefetch.py -R ' +roi_str
+#os.system(usace_download_cmd)
 
 #print "moving zip files to directory"
 #move_zip_cmd="find . -name '*.ZIP' -exec mv {} zip/ \; 2>/dev/null"
@@ -115,9 +111,12 @@ print "moving csv files to directory"
 move_csv_cmd="find . -name '*_nad83_mllw.csv' -exec mv {} csv/ \; 2>/dev/null"
 os.system(move_csv_cmd)
 
-print "Converting pos2neg, ft2m, and removing header"
+#most survey are in feet, positive down. But a few are negative.
+#Calculate median depth. If positive, convert to negative.
+
+print "Converting pos2neg if necessary, ft2m, and removing header"
 os.chdir('csv')
-ft2m_cmd = 'pos2neg_ft2m_head.sh .csv ,'
+ft2m_cmd = 'usace_ft2m.sh .csv ,'
 os.system(ft2m_cmd)
 
 print "moving xyz files to xyz dir"

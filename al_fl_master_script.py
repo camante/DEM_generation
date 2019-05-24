@@ -29,8 +29,10 @@ import glob
 #################################################################
 #################################################################
 code_dir='/media/sf_external_hd/al_fl/code/DEM_generation'
-#set main working directory
 main_dir='/media/sf_external_hd/al_fl'
+name_cell_extents='/media/sf_external_hd/al_fl/data/study_area/name_cell_extents.csv'
+#name_cell_extents='/media/sf_external_hd/al_fl/data/study_area/name_cell_extents_test.csv'
+
 os.chdir(main_dir)
 print 'Main Directory is', os.getcwd()
 #Creating main subdirectories
@@ -46,7 +48,8 @@ east_buff=-83.975
 south_buff=29.225
 north_buff=31.525
 roi_str=str(west_buff)+'/'+str(east_buff)+'/'+str(south_buff)+'/'+str(north_buff)
-
+print "ROI is", roi_str
+#-88.525/-83.975/29.225/31.525
 #################################################################
 #################################################################
 #################################################################
@@ -77,7 +80,7 @@ os.chdir('..')
 ####################### STUDY AREA ##############################
 #################################################################
 #manually created fishnet shp in Global Mapper (al_fl_tiles.shp) 
-#created name_cell_extents with arcpy get_poly_coords.py (name_cell_extent.csv) 
+#created name_cell_extents with arcpy get_poly_coords.py (name_cell_extents.csv) 
 #manually created study area buffer in ArcMap (al_fl_tiles_buff.shp)
 
 #################################################################
@@ -88,7 +91,9 @@ os.chdir('..')
 ########################## BATHY ################################
 #################################################################
 #Creating main subdirectories
-bathy_dir_list=['bathy/usace_dredge']
+os.chdir('bathy')
+
+bathy_dir_list=['usace_dredge', 'mb']
 #bathy_dir_list=['/media/sf_external_hd/test/usace_dredge']
 for i in bathy_dir_list:
 	if not os.path.exists(i):
@@ -99,20 +104,31 @@ for i in bathy_dir_list:
 #Requested NOS/BAG Files from Lee Shoemaker
 
 ######################## USACE DREDGE #############################
-#Download USACE with fetch
-os.chdir(bathy_dir_list[0])
+# os.chdir(bathy_dir_list[0])
+# print 'Current Directory is', os.getcwd()
+
+# #delete python script if it exists
+# os.system('[ -e usace_dredge_processing.py ] && rm usace_dredge_processing.py')
+# #copy python script from DEM_generation code
+# os.system('cp {}/usace_dredge_processing.py usace_dredge_processing.py'.format(code_dir)) 
+
+# print "executing usace_dredge_processing script"
+# os.system('python usace_dredge_processing.py {}'.format(conv_grd_path))
+
+######################## Multibeam #############################
+os.chdir(bathy_dir_list[1])
 print 'Current Directory is', os.getcwd()
 
 #delete python script if it exists
-os.system('[ -e usace_dredge_processing.py ] && rm usace_dredge_processing.py')
+os.system('[ -e mb_processing.py ] && rm mb_processing.py')
 #copy python script from DEM_generation code
-os.system('cp {}/usace_dredge_processing.py usace_dredge_processing.py'.format(code_dir)) 
+os.system('cp {}/mb_processing.py mb_processing.py'.format(code_dir)) 
 
-print "executing usace_dredge_processing script"
-os.system('python usace_dredge_processing.py {}'.format(conv_grd_path))
+print "executing mb_processing script"
+os.system('python mb_processing.py {}'.format(name_cell_extents))
 
-
-# #################################################################
+# ####
+#############################################################
 # ########################## BATHYTOPO ############################
 # #################################################################
 # bathytopo_list=[]
