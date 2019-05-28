@@ -36,7 +36,7 @@ name_cell_extents='/media/sf_external_hd/al_fl/data/study_area/name_cell_extents
 os.chdir(main_dir)
 print 'Main Directory is', os.getcwd()
 #Creating main subdirectories
-dir_list=['data', 'docs', 'software']
+dir_list=['data', 'docs', 'software', 'software/gridding']
 for i in dir_list:
 	if not os.path.exists(i):
 		print 'creating subdir', i
@@ -48,8 +48,10 @@ east_buff=-83.975
 south_buff=29.225
 north_buff=31.525
 roi_str=str(west_buff)+'/'+str(east_buff)+'/'+str(south_buff)+'/'+str(north_buff)
-print "ROI is", roi_str
 #-88.525/-83.975/29.225/31.525
+#test_ROI
+#roi_str='-88.5/-88.49/29.99/30'
+print "ROI is", roi_str
 #################################################################
 #################################################################
 #################################################################
@@ -93,15 +95,12 @@ os.chdir('..')
 #Creating main subdirectories
 os.chdir('bathy')
 
-bathy_dir_list=['usace_dredge', 'mb']
+bathy_dir_list=['usace_dredge', 'mb', 'nos']
 #bathy_dir_list=['/media/sf_external_hd/test/usace_dredge']
 for i in bathy_dir_list:
 	if not os.path.exists(i):
 		print 'creating subdir', i
 		os.makedirs(i)
-
-########################## NOS/BAG ################################
-#Requested NOS/BAG Files from Lee Shoemaker
 
 ######################## USACE DREDGE #############################
 # os.chdir(bathy_dir_list[0])
@@ -113,21 +112,35 @@ for i in bathy_dir_list:
 # os.system('cp {}/usace_dredge_processing.py usace_dredge_processing.py'.format(code_dir)) 
 
 # print "executing usace_dredge_processing script"
-# os.system('python usace_dredge_processing.py {}'.format(conv_grd_path))
-
+# os.system('python usace_dredge_processing.py {} {}'.format(main_dir, conv_grd_path))
+# os.chdir('..')
 ######################## Multibeam #############################
-os.chdir(bathy_dir_list[1])
+# os.chdir(bathy_dir_list[1])
+# print 'Current Directory is', os.getcwd()
+
+# #delete python script if it exists
+# os.system('[ -e mb_processing.py ] && rm mb_processing.py')
+# #copy python script from DEM_generation code
+# os.system('cp {}/mb_processing.py mb_processing.py'.format(code_dir)) 
+
+# print "executing mb_processing script"
+# os.system('python mb_processing.py {} {}'.format(main_dir, name_cell_extents))
+# os.chdir('..')
+# ####
+########################## NOS/BAG ################################
+os.chdir(bathy_dir_list[2])
 print 'Current Directory is', os.getcwd()
 
-#delete python script if it exists
-os.system('[ -e mb_processing.py ] && rm mb_processing.py')
-#copy python script from DEM_generation code
-os.system('cp {}/mb_processing.py mb_processing.py'.format(code_dir)) 
+# #delete python script if it exists
+os.system('[ -e nos_processing.py ] && rm nos_processing.py')
+# #copy python script from DEM_generation code
 
-print "executing mb_processing script"
-os.system('python mb_processing.py {}'.format(name_cell_extents))
+os.system('cp {}/nos_processing.py nos_processing.py'.format(code_dir)) 
 
-# ####
+print "executing nos_processing script"
+os.system('python nos_processing.py {} {} {}'.format(main_dir,roi_str,conv_grd_path))
+os.chdir('..')
+
 #############################################################
 # ########################## BATHYTOPO ############################
 # #################################################################

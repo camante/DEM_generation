@@ -26,8 +26,8 @@ import sys
 import glob
 ######################## USACE DREDGE ###########################
 print "Current directory is ", os.getcwd()
-
-conv_grd_path=sys.argv[1]
+main_dir=sys.argv[1]
+conv_grd_path=sys.argv[2]
 print "Conversion grid path is ", conv_grd_path
 
 #sys.exit()
@@ -134,3 +134,8 @@ os.chdir('navd88')
 usace_datalist_cmd='create_datalist.sh usace_dredge'
 os.system(usace_datalist_cmd)
 
+current_dir=os.getcwd()
+add_to_bmaster_cmd='echo ' + current_dir + '/usace_dredge.datalist -1 1 >> ' + main_dir + '/data/bathy_surf/al_fl_bs.datalist' 
+os.system(add_to_bmaster_cmd)
+#add_to_master_cmd='echo ' + current_dir + '/usace_dredge.datalist -1 1 >> ' + main_dir + '/software/gridding/al_fl.datalist' 
+#os.system(add_to_master_cmd)
