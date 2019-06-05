@@ -60,41 +60,41 @@ resamp_res=0.000030864199
 # os.system(move_bag_gz_cmd)
 
 # print "Unzipping NOS"
-os.chdir('nos_hydro')
+# os.chdir('nos_hydro')
 # os.system('gunzip *.xyz.gz')
 
 # print "Moving all xyz files to xyz directory"
 # move_xyz_cmd="find . -name '*.xyz' -exec mv {} xyz/ \; 2>/dev/null"
 # os.system(move_xyz_cmd)
 
-print "Converting NOS to X,Y,Negative Z"
-os.chdir('xyz')
-neg_z_cmd=('nos2xyz.sh')
-os.system(neg_z_cmd)
+# print "Converting NOS to X,Y,Negative Z"
+# os.chdir('xyz')
+# neg_z_cmd=('nos2xyz.sh')
+# os.system(neg_z_cmd)
 
-print "Converting NOS to NAVD88"
-os.chdir('neg_m')
-nos2navd88_cmd="vert_conv.sh " + conv_grd_path + "  navd88"
-os.system(nos2navd88_cmd)
+# print "Converting NOS to NAVD88"
+# os.chdir('neg_m')
+# nos2navd88_cmd="vert_conv.sh " + conv_grd_path + "  navd88"
+# os.system(nos2navd88_cmd)
 
-print "Creating NOS Datalist"
-os.chdir('navd88')
-nos_datalist_cmd='create_datalist.sh nos'
-os.system(nos_datalist_cmd)
+# print "Creating NOS Datalist"
+# os.chdir('navd88')
+# nos_datalist_cmd='create_datalist.sh nos'
+# os.system(nos_datalist_cmd)
 
-current_dir=os.getcwd()
-add_to_bmaster_cmd='echo ' + current_dir + '/nos.datalist -1 1 >> ' + main_dir + '/data/bathy_surf/al_fl_bs.datalist' 
-os.system(add_to_bmaster_cmd)
-#add_to_master_cmd='echo ' + current_dir + '/nos.datalist -1 1 >> ' + main_dir + '/software/gridding/al_fl.datalist' 
-#os.system(add_to_master_cmd)
-os.chdir('../../../..')
+# current_dir=os.getcwd()
+# add_to_bmaster_cmd='echo ' + current_dir + '/nos.datalist -1 1 >> ' + main_dir + '/data/bathy_surf/al_fl_bs.datalist' 
+# os.system(add_to_bmaster_cmd)
+# #add_to_master_cmd='echo ' + current_dir + '/nos.datalist -1 1 >> ' + main_dir + '/software/gridding/al_fl.datalist' 
+# #os.system(add_to_master_cmd)
+# os.chdir('../../../..')
 
 
 os.chdir('nos_bag')
 
-print "Converting BAG to Resampled tif and to XYZ"
-bag2tif2chunks2xyz_cmd='bag2tif2chunks2xyz.sh ' +str(chunk_size) + ' ' + str(resamp_bag) + ' ' + str(resamp_res)
-os.system(bag2tif2chunks2xyz_cmd)
+# print "Converting BAG to Resampled tif and to XYZ"
+# bag2tif2chunks2xyz_cmd='bag2tif2chunks2xyz.sh ' +str(chunk_size) + ' ' + str(resamp_bag) + ' ' + str(resamp_res)
+# os.system(bag2tif2chunks2xyz_cmd)
 
 print "Converting BAG to NAVD88"
 os.chdir('xyz')
