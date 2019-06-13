@@ -54,7 +54,10 @@ east_buff=-83.975
 south_buff=29.225
 north_buff=31.525
 roi_str=str(west_buff)+'/'+str(east_buff)+'/'+str(south_buff)+'/'+str(north_buff)
-#-88.525/-83.975/29.225/31.525
+roi_str_ogr=str(west_buff)+' '+str(south_buff)+' '+str(east_buff)+' '+str(north_buff) 
+#roi_str=-88.525/-83.975/29.225/31.525
+#roi_str_ogr='-88.525 29.225 -83.975 31.525'
+
 #test_ROI
 #roi_str='-88.5/-88.49/29.99/30'
 print "ROI is", roi_str
@@ -97,6 +100,23 @@ conv_grd_path=main_dir+'/data/conv_grd/cgrid_mllw2navd88.tif'
 #################################################################
 ######################## COASTLINE ##############################
 #################################################################
+coast_dir_list=['coast']
+for i in coast_dir_list:
+	if not os.path.exists(i):
+		print 'creating subdir', i
+		os.makedirs(i)
+
+os.chdir(coast_dir_list[0])
+
+# #delete python script if it exists
+os.system('[ -e coast_processing.py ] && rm coast_processing.py')
+# #copy python script from DEM_generation code
+
+os.system('cp {}/coast_processing.py coast_processing.py'.format(code_dir)) 
+
+print "executing coast_processing script"
+os.system('python coast_processing.py {} {} {}'.format(main_dir,study_area_shp,roi_str_ogr))
+os.chdir('..')
 
 #################################################################
 ########################## BATHY ################################
