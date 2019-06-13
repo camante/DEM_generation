@@ -61,7 +61,8 @@ roi_str_ogr=str(west_buff)+' '+str(south_buff)+' '+str(east_buff)+' '+str(north_
 #test_ROI
 #roi_str='-88.5/-88.49/29.99/30'
 print "ROI is", roi_str
-
+print "ROI OGR is", roi_str_ogr
+#sys.exit()
 #shp for digital coast download
 study_area_shp=main_dir + '/data/study_area/al_fl_tiles_buff.shp'
 
@@ -173,23 +174,23 @@ os.chdir('..')
 #############################################################
 ################## DIGITAL COAST LIDAR ######################
 #############################################################
-dc_dir_list=['dc_lidar']
-for i in dc_dir_list:
-	if not os.path.exists(i):
-		print 'creating subdir', i
-		os.makedirs(i)
+# dc_dir_list=['dc_lidar']
+# for i in dc_dir_list:
+# 	if not os.path.exists(i):
+# 		print 'creating subdir', i
+# 		os.makedirs(i)
 
-os.chdir(dc_dir_list[0])
+# os.chdir(dc_dir_list[0])
 
-# #delete python script if it exists
-os.system('[ -e dc_lidar_processing.py ] && rm dc_lidar_processing.py')
-# #copy python script from DEM_generation code
+# # #delete python script if it exists
+# os.system('[ -e dc_lidar_processing.py ] && rm dc_lidar_processing.py')
+# # #copy python script from DEM_generation code
 
-os.system('cp {}/dc_lidar_processing.py dc_lidar_processing.py'.format(code_dir)) 
+# os.system('cp {}/dc_lidar_processing.py dc_lidar_processing.py'.format(code_dir)) 
 
-print "executing dc_lidar_processing script"
-os.system('python dc_lidar_processing.py {} {}'.format(main_dir,study_area_shp))
-os.chdir('..')
+# print "executing dc_lidar_processing script"
+# os.system('python dc_lidar_processing.py {} {}'.format(main_dir,study_area_shp))
+# os.chdir('..')
 
 # #################################################################
 # #################################################################

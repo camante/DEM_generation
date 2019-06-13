@@ -49,7 +49,7 @@ if not os.path.exists('landsat'):
 #Params from master script:
 main_dir=sys.argv[1]
 study_area_shp=sys.argv[2]
-roi_str_ogr=sys.argv[3]
+roi_str_ogr=sys.argv[3]+' '+sys.argv[4]+' '+sys.argv[5]+' '+sys.argv[6]
 #Hard-coded to test
 #main_dir='/media/sf_external_hd/al_fl'
 #study_area_shp=main_dir + '/data/study_area/al_fl_tiles_buff.shp'
@@ -61,77 +61,79 @@ landsat_shp='/media/sf_win_lx/coastal_act/data/coast/landsat_all_NA.shp'
 #If need large disconnected rivers,esp. on tile edges that got cut off, make value higher, e.g. num_nhd_polys=2.
 num_nhd_polys='2'
 
-print "Rasterizing Study Area w Buff"
-rast_study_area_cmd = 'gdal_rasterize -tr 0.00003086420 0.00003086420 -burn 0 -ot Int16 -co COMPRESS=DEFLATE ' + study_area_shp + ' al_fl_tiles_buff.tif'
-os.system(rast_study_area_cmd)
+# print "Rasterizing Study Area w Buff"
+# rast_study_area_cmd = 'gdal_rasterize -tr 0.00003086420 0.00003086420 -burn 0 -ot Int16 -co COMPRESS=DEFLATE ' + study_area_shp + ' al_fl_tiles_buff.tif'
+# os.system(rast_study_area_cmd)
 
-print "Copying Raster to burn NHD"
-cp_cmd = 'cp al_fl_tiles_buff.tif nhd/al_fl_nhd.tif'
-os.system(cp_cmd)
+# print "Copying Raster to burn NHD"
+# cp_cmd = 'cp al_fl_tiles_buff.tif nhd/al_fl_nhd.tif'
+# os.system(cp_cmd)
 
-print "Copying Raster to burn clean NHD"
-cp_cmd2 = 'cp al_fl_tiles_buff.tif nhd/al_fl_nhd_clean.tif'
-os.system(cp_cmd2)
+# print "Copying Raster to burn clean NHD"
+# cp_cmd2 = 'cp al_fl_tiles_buff.tif nhd/al_fl_nhd_clean.tif'
+# os.system(cp_cmd2)
 
-print "Copying Raster to burn Landsat"
-cp_cmd3 = 'cp al_fl_tiles_buff.tif landsat/al_fl_landsat.tif'
-os.system(cp_cmd3)
+# print "Copying Raster to burn Landsat"
+# cp_cmd3 = 'cp al_fl_tiles_buff.tif landsat/al_fl_landsat.tif'
+# os.system(cp_cmd3)
 
 os.chdir('nhd')
-print 'Downloading nhd from USGS'
-nhd_download_cmd='tnmfetch.py -R ' + study_area_shp + ' -d 4:0 -f "FileGDB"' 
-os.system(nhd_download_cmd)
+# print 'Downloading nhd from USGS'
+# nhd_download_cmd='tnmfetch.py -R ' + study_area_shp + ' -d 4:0 -f "FileGDB"' 
+# os.system(nhd_download_cmd)
 
-print 'Moving all zip folders to main nhd dir'
-move_zip_cmd="find . -name '*.zip*' -exec mv {} zip/ \; 2>/dev/null"
-os.system(move_zip_cmd)
+# print 'Moving all zip folders to main nhd dir'
+# move_zip_cmd="find . -name '*.zip*' -exec mv {} zip/ \; 2>/dev/null"
+# os.system(move_zip_cmd)
 
-print "Unzipping NHD GDB"
-os.chdir('zip')
-unzip_cmd='unzip "*.zip"'
-os.system(unzip_cmd)
-os.chdir('..')
+# print "Unzipping NHD GDB"
+# os.chdir('zip')
+# unzip_cmd='unzip "*.zip"'
+# os.system(unzip_cmd)
+# os.chdir('..')
 
-print "Moving all gdb files to gdb dir"
-move_gdb_cmd="find . -name '*.gdb' -exec mv {} gdb/ \; 2>/dev/null"
-os.system(move_gdb_cmd)
-os.chdir('gdb')
+# print "Moving all gdb files to gdb dir"
+# move_gdb_cmd="find . -name '*.gdb' -exec mv {} gdb/ \; 2>/dev/null"
+# os.system(move_gdb_cmd)
+# os.chdir('gdb')
 
-print "Converting NHD GDB to Shapefile"
-for i in glob.glob("*gdb"):
-	print "Processing File", i
-	gdb_basename = i[:-4]
-	create_nhd_shp_cmd = 'ogr2ogr -f "ESRI Shapefile" {} {} NHDArea -overwrite'.format(gdb_basename, i)
-	os.system(create_nhd_shp_cmd)
-	#rename files
-	rename_shp_cmd = 'mv {}/NHDArea.shp {}/{}_NHDArea.shp'.format(gdb_basename, gdb_basename, gdb_basename)
-	os.system(rename_shp_cmd)
-	rename_dbf_cmd = 'mv {}/NHDArea.dbf {}/{}_NHDArea.dbf'.format(gdb_basename, gdb_basename, gdb_basename)
-	os.system(rename_dbf_cmd)
-	rename_shx_cmd = 'mv {}/NHDArea.shx {}/{}_NHDArea.shx'.format(gdb_basename, gdb_basename, gdb_basename)
-	os.system(rename_shx_cmd)
-	rename_prj_cmd = 'mv {}/NHDArea.prj {}/{}_NHDArea.prj'.format(gdb_basename, gdb_basename, gdb_basename)
-	os.system(rename_prj_cmd)
+# print "Converting NHD GDB to Shapefile"
+# for i in glob.glob("*gdb"):
+# 	print "Processing File", i
+# 	gdb_basename = i[:-4]
+# 	create_nhd_shp_cmd = 'ogr2ogr -f "ESRI Shapefile" {} {} NHDArea -overwrite'.format(gdb_basename, i)
+# 	os.system(create_nhd_shp_cmd)
+# 	#rename files
+# 	rename_shp_cmd = 'mv {}/NHDArea.shp {}/{}_NHDArea.shp'.format(gdb_basename, gdb_basename, gdb_basename)
+# 	os.system(rename_shp_cmd)
+# 	rename_dbf_cmd = 'mv {}/NHDArea.dbf {}/{}_NHDArea.dbf'.format(gdb_basename, gdb_basename, gdb_basename)
+# 	os.system(rename_dbf_cmd)
+# 	rename_shx_cmd = 'mv {}/NHDArea.shx {}/{}_NHDArea.shx'.format(gdb_basename, gdb_basename, gdb_basename)
+# 	os.system(rename_shx_cmd)
+# 	rename_prj_cmd = 'mv {}/NHDArea.prj {}/{}_NHDArea.prj'.format(gdb_basename, gdb_basename, gdb_basename)
+# 	os.system(rename_prj_cmd)
 
 
-print 'Moving all shp files to shp dir'
-os.chdir('..')
-move_shp_cmd="find . -name '*.shp*' -exec mv {} shp/ \; 2>/dev/null"
-os.system(move_shp_cmd)
-move_dbf_cmd="find . -name '*.dbf*' -exec mv {} shp/ \; 2>/dev/null"
-os.system(move_dbf_cmd)
-move_shx_cmd="find . -name '*.shx*' -exec mv {} shp/ \; 2>/dev/null"
-os.system(move_shx_cmd)
-move_prj_cmd="find . -name '*.prj*' -exec mv {} shp/ \; 2>/dev/null"
-os.system(move_prj_cmd)
+# print 'Moving all shp files to shp dir'
+# os.chdir('..')
+# move_shp_cmd="find . -name '*.shp*' -exec mv {} shp/ \; 2>/dev/null"
+# os.system(move_shp_cmd)
+# move_dbf_cmd="find . -name '*.dbf*' -exec mv {} shp/ \; 2>/dev/null"
+# os.system(move_dbf_cmd)
+# move_shx_cmd="find . -name '*.shx*' -exec mv {} shp/ \; 2>/dev/null"
+# os.system(move_shx_cmd)
+# move_prj_cmd="find . -name '*.prj*' -exec mv {} shp/ \; 2>/dev/null"
+# os.system(move_prj_cmd)
 
-print "Merging NHD Shapefiles"
-os.chdir('shp')
-merge_shp_cmd='for f in *.shp; do ogr2ogr -update -append merge/nhdArea_merge.shp $f -f "ESRI Shapefile"; done;'
-os.system(merge_shp_cmd)
+# print "Merging NHD Shapefiles"
+# os.chdir('shp')
+# merge_shp_cmd='for f in *.shp; do ogr2ogr -update -append merge/nhdArea_merge.shp $f -f "ESRI Shapefile"; done;'
+# os.system(merge_shp_cmd)
 
-print "Clipping Merged NHD Shp to Study Area"
-os.chdir('..')
+# print "Clipping Merged NHD Shp to Study Area"
+# os.chdir('..')
+print roi_str_ogr
+
 clip_nhd_cmd='ogr2ogr -clipsrc ' + roi_str_ogr + ' al_fl_nhd.shp ' + 'shp/merge/nhdArea_merge.shp'
 print clip_nhd_cmd
 os.system(clip_nhd_cmd)
