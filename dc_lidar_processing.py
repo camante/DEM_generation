@@ -29,8 +29,8 @@ import sys
 ######################## NOS ####################################
 print "Current directory is ", os.getcwd()
 
-if not os.path.exists('raster'):
-	os.makedirs('raster')
+# if not os.path.exists('raster'):
+# 	os.makedirs('raster')
 
 if not os.path.exists('lidar'):
 	os.makedirs('lidar')
@@ -39,26 +39,78 @@ main_dir=sys.argv[1]
 study_area_shp=sys.argv[2]
 
 #dcfetch.py -R /media/sf_external_hd/al_fl/data/study_area/al_fl_tiles_buff.shp --filter "ID = 8629 or ID = 8668 or ID = 8387 or ID = 8683 or ID = 8616 or ID = 8682 or ID = 6371 or ID = 8567 or ID = 5190 or ID = 5166 or ID = 5169" -x
+# os.chdir('raster')
+# print 'Downloading rasters from Digital Coast'
+# #raster_download_cmd='dcfetch.py -R ' + study_area_shp + ' --filter "ID = 8629 or ID = 8668 or ID = 8387 or ID = 8683 or ID = 8616 or ID = 8682 or ID = 6371 or ID = 8567 or ID = 5190 or ID = 5166 or ID = 5169"' 
+# #os.system(raster_download_cmd)
+# #Download individual datasets that didn't work with fetch
+# os.chdir('htdata/raster2/elevation')
+# #os.system('wget -R 2016_NCMP_TX*.tif -np -r -nH -L --cut-dirs=3 https://coast.noaa.gov/htdata/raster2/elevation/USACE_Gulf_Topobathy_DEM_2016_6371/') 
+# os.system('wget -np -r -nH -L --cut-dirs=3 https://coast.noaa.gov/htdata/raster2/elevation/USACE_Florida_Gulf_Cst_Topobathy_DEM_2015_5190/')
+# os.chdir('..')
 
-os.chdir('raster')
-print 'Downloading rasters from Digital Coast'
-raster_download_cmd='dcfetch.py -R ' + study_area_shp + ' --filter "ID = 8629 or ID = 8668 or ID = 8387 or ID = 8683 or ID = 8616 or ID = 8682 or ID = 6371 or ID = 8567 or ID = 5190 or ID = 5166 or ID = 5169"' 
-os.system(raster_download_cmd)
-os.chdir('..')
+# print "Starting Data Processing"
+# os.chdir('raster/htdata/raster2/elevation')
 
+# #Navigate into each subdir and process.
+# #Move all tifs to subfolder tif
+# #Process on tif
 
 os.chdir('lidar')
 print 'Downloading lidar from Digital Coast'
-lidar_download_cmd='dcfetch.py -R ' + study_area_shp + ' --filter "ID = 6322 or ID = 5168 or ID = 4924 or ID = 1425"'
+#lidar_download_cmd='dcfetch.py -R ' + study_area_shp + ' --filter "ID = 6322 or ID = 5168 or ID = 4924 or ID = 1425"'
+#dcfetch.py -R /media/sf_external_hd/al_fl/data/study_area/al_fl_tiles_buff.shp --filter "Year >= 2011 and Datatype ='lidar' and ID != 2610"
+lidar_download_cmd='dcfetch.py -R ' + study_area_shp + ' --filter "Year >= 2011 and Datatype ='lidar' and ID != 2610"'
 os.system(lidar_download_cmd)
 
+print "Processing Data"
+#Mv Directory to main lidar dir
+#pub\DigitalCoast\lidar1_z\geoid12a
+#pub\DigitalCoast\lidar1_z\geoid12b
+#pub\DigitalCoast\lidar2_z\geoid12a
+#pub\DigitalCoast\lidar2_z\geoid12b
+
+#Convert to laz to xyz for the following classes
+1425,2
+4966,2
+5168,2
+5183,2,29
+5186,2,29
+6322,2,26
+8386,2
+8563,2 
+8596,2
+8619,2,29
+8625,2,29 
+8626,2,29
+8680,2 
+8681,2 
+
+
+cmd='''for D in ./*; do
+    if [ -d "$D" ]; then
+        cd "$D"
+        echo "Current directory is" $PWD
+        if not os.path.exists('tif'):
+        	os.makedirs('tif')
+        echo "Moving all tifs"
+        os.system("find . -name '*.tif' -exec mv {} tif/ \; 2>/dev/null")
+        cd ..
+    fi
+done'''
+os.system(cmd)
 
 
 
+#Navigate into each subdir and run laz2xyz.sh
+#For topo datasets, extract class 2
+#Create datalist
+#create_datalist.sh 
 
-
-
-
+#For topobathy datasets, extract classes 2 and 29
+# And then separate between negative and positive
+# sep_pos_neg.sh
+# create datalist.
 
 
 

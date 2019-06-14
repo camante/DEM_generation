@@ -65,17 +65,13 @@ num_nhd_polys='2'
 # rast_study_area_cmd = 'gdal_rasterize -tr 0.00003086420 0.00003086420 -burn 0 -ot Int16 -co COMPRESS=DEFLATE ' + study_area_shp + ' al_fl_tiles_buff.tif'
 # os.system(rast_study_area_cmd)
 
-# print "Copying Raster to burn NHD"
-# cp_cmd = 'cp al_fl_tiles_buff.tif nhd/al_fl_nhd.tif'
-# os.system(cp_cmd)
+print "Copying Raster to burn clean NHD"
+cp_cmd = 'cp al_fl_tiles_buff.tif nhd/al_fl_nhd_clean.tif'
+os.system(cp_cmd)
 
-# print "Copying Raster to burn clean NHD"
-# cp_cmd2 = 'cp al_fl_tiles_buff.tif nhd/al_fl_nhd_clean.tif'
-# os.system(cp_cmd2)
-
-# print "Copying Raster to burn Landsat"
-# cp_cmd3 = 'cp al_fl_tiles_buff.tif landsat/al_fl_landsat.tif'
-# os.system(cp_cmd3)
+print "Copying Raster to burn Landsat"
+cp_cmd2 = 'cp al_fl_tiles_buff.tif landsat/al_fl_landsat.tif'
+os.system(cp_cmd2)
 
 os.chdir('nhd')
 # print 'Downloading nhd from USGS'
@@ -130,16 +126,16 @@ os.chdir('nhd')
 # merge_shp_cmd='for f in *.shp; do ogr2ogr -update -append merge/nhdArea_merge.shp $f -f "ESRI Shapefile"; done;'
 # os.system(merge_shp_cmd)
 
-# print "Clipping Merged NHD Shp to Study Area"
-# os.chdir('..')
-print roi_str_ogr
 
-clip_nhd_cmd='ogr2ogr -clipsrc ' + roi_str_ogr + ' al_fl_nhd.shp ' + 'shp/merge/nhdArea_merge.shp'
-print clip_nhd_cmd
+# os.chdir('..')
+# print roi_str_ogr
+
+print "Clipping Merged NHD Shp to Study Area"
+clip_nhd_cmd='ogr2ogr -clipsrc ' + study_area_shp + ' al_fl_nhd.shp ' + 'shp/merge/nhdArea_merge.shp'
 os.system(clip_nhd_cmd)
 
 print "Rasterizing Shp"
-raster_shp_cmd = "gdal_rasterize -burn 1 -l al_fl_nhd al_fl_nhd.shp al_fl_nhd.tif"
+raster_shp_cmd = "gdal_rasterize -tr 0.00003086420 0.00003086420 -burn 1 -ot Int16 -co COMPRESS=DEFLATE al_fl_nhd.shp al_fl_nhd.tif"
 os.system(raster_shp_cmd)
 
 print "Polygonizing Raster"
@@ -166,12 +162,12 @@ clip_landsat_cmd='ogr2ogr -clipsrc ' + roi_str_ogr + ' al_fl_landsat.shp ' + lan
 os.system(clip_landsat_cmd)
 
 print "Rasterizing Landsat Shp"
-raster_shp_cmd2 = "gdal_rasterize -burn 1 -l al_fl_landsat al_fl_landsat.shp al_fl_landsat.tif"
+raster_shp_cmd2 = "gdal_rasterize -i -burn 1 -l al_fl_landsat al_fl_landsat.shp al_fl_landsat.tif"
 os.system(raster_shp_cmd2)
 
-print "Re-classifying raster"
-rc_rast_cmd = 'gdal_calc.py -A al_fl_landsat.tif --outfile=al_fl_landsat_rc.tif --calc="0*(A>0)" --calc="1*(A<1)" --format=GTiff --overwrite'
-os.system(rc_rast_cmd)
+# print "Re-classifying raster"
+# rc_rast_cmd = 'gdal_calc.py -A al_fl_landsat.tif --outfile=al_fl_landsat_rc.tif --calc="0*(A>0)" --calc="1*(A<1)" --format=GTiff --overwrite'
+# os.system(rc_rast_cmd)
 
 os.chdir('..')
 

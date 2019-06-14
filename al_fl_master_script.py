@@ -65,7 +65,7 @@ print "ROI OGR is", roi_str_ogr
 #sys.exit()
 #shp for digital coast download
 study_area_shp=main_dir + '/data/study_area/al_fl_tiles_buff.shp'
-
+#/media/sf_external_hd/al_fl/data/study_area/al_fl_tiles_buff.shp
 #################################################################
 #################################################################
 #################################################################
