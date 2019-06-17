@@ -61,9 +61,9 @@ landsat_shp='/media/sf_win_lx/coastal_act/data/coast/landsat_all_NA.shp'
 #If need large disconnected rivers,esp. on tile edges that got cut off, make value higher, e.g. num_nhd_polys=2.
 num_nhd_polys='2'
 
-# print "Rasterizing Study Area w Buff"
-# rast_study_area_cmd = 'gdal_rasterize -tr 0.00003086420 0.00003086420 -burn 0 -ot Int16 -co COMPRESS=DEFLATE ' + study_area_shp + ' al_fl_tiles_buff.tif'
-# os.system(rast_study_area_cmd)
+print "Rasterizing Study Area w Buff"
+rast_study_area_cmd = 'gdal_rasterize -tr 0.00003086420 0.00003086420 -te ' + roi_str_ogr + ' -burn 0 -ot Int16 -co COMPRESS=DEFLATE ' + study_area_shp + ' al_fl_tiles_buff.tif'
+os.system(rast_study_area_cmd)
 
 print "Copying Raster to burn clean NHD"
 cp_cmd = 'cp al_fl_tiles_buff.tif nhd/al_fl_nhd_clean.tif'
@@ -130,28 +130,31 @@ os.chdir('nhd')
 # os.chdir('..')
 # print roi_str_ogr
 
+
 print "Clipping Merged NHD Shp to Study Area"
-clip_nhd_cmd='ogr2ogr -clipsrc ' + study_area_shp + ' al_fl_nhd.shp ' + 'shp/merge/nhdArea_merge.shp'
+clip_nhd_cmd='ogr2ogr -clipsrc ' + roi_str_ogr + ' al_fl_nhd.shp ' + 'shp/merge/nhdArea_merge.shp'
+#ogr2ogr -clipsrc -88.5 30.25 -88.25 30.5 al_fl_nhd_test.shp shp/merge/nhdArea_merge.shp
 os.system(clip_nhd_cmd)
 
 print "Rasterizing Shp"
 raster_shp_cmd = "gdal_rasterize -tr 0.00003086420 0.00003086420 -burn 1 -ot Int16 -co COMPRESS=DEFLATE al_fl_nhd.shp al_fl_nhd.tif"
+#gdal_rasterize -tr 0.00003086420 0.00003086420 -burn 1 -ot Int16 -co COMPRESS=DEFLATE al_fl_nhd_test.shp al_fl_nhd_test.tif
 os.system(raster_shp_cmd)
 
 print "Polygonizing Raster"
 poly_rast_cmd = "gdal_polygonize.py -8 -f 'ESRI Shapefile' al_fl_nhd.tif al_fl_nhd_rast.shp"
+#gdal_polygonize.py -8 -f 'ESRI Shapefile' al_fl_nhd_test.tif al_fl_nhd_rast_test.shp
 os.system(poly_rast_cmd)
 
-print "Deleting Field"
-del_field_cmd = 'ogrinfo al_fl_nhd_rast.shp -sql "ALTER TABLE al_fl_nhd_rast DROP COLUMN DN"'
-os.system(del_field_cmd)
-
 print "Removing Disconnected Rivers"
-rm_polys_cmd = '''ogr2ogr -dialect SQLITE -sql "SELECT * FROM al_fl_nhd_rast order by ST_AREA(geometry) desc limit {}" al_fl_nhd_clean.shp al_fl_nhd_rast.shp'''.format(num_nhd_polys)
+rm_polys_cmd = '''ogr2ogr -dialect SQLITE -sql "SELECT * FROM al_fl_nhd_rast WHERE DN='1' order by ST_AREA(geometry) desc limit {}" al_fl_nhd_clean.shp al_fl_nhd_rast.shp'''.format(num_nhd_polys)
+#ogr2ogr -dialect SQLITE -sql "SELECT * FROM al_fl_nhd_rast_test WHERE DN='1' order by ST_AREA(geometry) desc limit 2" al_fl_nhd_clean_test.shp al_fl_nhd_rast_test.shp
 os.system(rm_polys_cmd)
 
 print "Re-Rasterizing Shp"
 raster_shp_cmd = "gdal_rasterize -burn 1 -l al_fl_nhd_clean al_fl_nhd_clean.shp al_fl_nhd_clean.tif"
+#gdal_rasterize -tr 0.00003086420 0.00003086420 -burn 0 -ot Int16 -co COMPRESS=DEFLATE  -te -88.5 30.25 -88.25 30.5 al_fl_nhd_clean_test.tif
+#gdal_rasterize -burn 1 -l al_fl_nhd_clean al_fl_nhd_clean_test.shp al_fl_nhd_clean_test.tif
 os.system(raster_shp_cmd)
 
 os.chdir('..')
@@ -163,22 +166,27 @@ os.system(clip_landsat_cmd)
 
 print "Rasterizing Landsat Shp"
 raster_shp_cmd2 = "gdal_rasterize -i -burn 1 -l al_fl_landsat al_fl_landsat.shp al_fl_landsat.tif"
+#gdal_rasterize -tr 0.00003086420 0.00003086420 -burn 0 -ot Int16 -co COMPRESS=DEFLATE  -te -88.5 30.25 -88.25 30.5 al_fl_landsat.shp al_fl_landsat_test.tif
 os.system(raster_shp_cmd2)
-
-# print "Re-classifying raster"
-# rc_rast_cmd = 'gdal_calc.py -A al_fl_landsat.tif --outfile=al_fl_landsat_rc.tif --calc="0*(A>0)" --calc="1*(A<1)" --format=GTiff --overwrite'
-# os.system(rc_rast_cmd)
 
 os.chdir('..')
 
 print "Adding NHD and Landsat Rasters"
-add_rasts_cmd = 'gdal_calc.py -A nhd/al_fl_nhd_clean.tif -B landsat/al_fl_landsat_rc.tif --outfile=al_fl_coast_sum.tif --calc="A + B" --format=GTiff --overwrite'
+add_rasts_cmd = 'gdal_calc.py -A nhd/al_fl_nhd_clean.tif -B landsat/al_fl_landsat.tif --outfile=al_fl_coast_sum.tif --calc="A + B" --format=GTiff --overwrite'
+#gdal_calc.py -A nhd/al_fl_nhd_clean_test.tif -B landsat/al_fl_landsat_test.tif --outfile=al_fl_coast_sum_test.tif --calc="A + B" --format=GTiff --overwrite
 os.system(add_rasts_cmd)
 
 print "Reclassifying Rasters"
 rc_rast_cmd2 = 'gdal_calc.py -A al_fl_coast_sum.tif --outfile=al_fl_coast_rc.tif --calc="1*(A > 0)" --format=GTiff --overwrite'
+#gdal_calc.py -A al_fl_coast_sum_test.tif --outfile=al_fl_coast_rc_test.tif --calc="1*(A > 0)" --format=GTiff --overwrite
 os.system(rc_rast_cmd2)
 
 print "Polygonizing Re-classified Raster"
-poly_rc_rast_cmd = "gdal_polygonize.py -8 -f 'ESRI Shapefile' al_fl_coast_rc.tif al_fl_coast.shp"
+poly_rc_rast_cmd = "gdal_polygonize.py -8 -f 'ESRI Shapefile' al_fl_coast_rc.tif al_fl_coast_all.shp"
+#gdal_polygonize.py -8 -f 'ESRI Shapefile' al_fl_coast_rc_test.tif al_fl_coast_all_test.shp
 os.system(poly_rc_rast_cmd)
+
+print "Removing Bathy Areas"
+rm_bathy_cmd = '''ogr2ogr -dialect SQLITE -sql "SELECT * FROM al_fl_coast_all WHERE DN='0'" al_fl_coast.shp al_fl_coast_all.shp'''
+#ogr2ogr -dialect SQLITE -sql "SELECT * FROM al_fl_coast_all_test WHERE DN='0'" al_fl_coast_test.shp al_fl_coast_all_test.shp
+os.system(rm_bathy_cmd)

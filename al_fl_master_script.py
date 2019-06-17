@@ -54,12 +54,13 @@ east_buff=-83.975
 south_buff=29.225
 north_buff=31.525
 roi_str=str(west_buff)+'/'+str(east_buff)+'/'+str(south_buff)+'/'+str(north_buff)
-roi_str_ogr=str(west_buff)+' '+str(south_buff)+' '+str(east_buff)+' '+str(north_buff) 
-#roi_str=-88.525/-83.975/29.225/31.525
-#roi_str_ogr='-88.525 29.225 -83.975 31.525'
+roi_str_ogr=str(west_buff)+' '+str(south_buff)+' '+str(east_buff)+' '+str(north_buff)
 
 #test_ROI
+#roi_str=-88.525/-83.975/29.225/31.525
 #roi_str='-88.5/-88.49/29.99/30'
+#roi_str_ogr='-88.525 29.225 -83.975 31.525'
+#roi_str_ogr='-88.5 30.25 -88.25 30.5' 
 print "ROI is", roi_str
 print "ROI OGR is", roi_str_ogr
 #sys.exit()
