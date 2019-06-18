@@ -43,10 +43,16 @@ for i in dir_list:
 		os.makedirs(i)
 
 #Create Empty Bathy Surface and DEM datalists
-bs_dlist='touch ' + main_dir + '/data/bathy/bathy_surf/al_fl_bs.datalist'
+bs_dlist='''if [ ! -e {}/data/bathy/bathy_surf/al_fl_bs.datalist ] ; 
+then touch {}/data/bathy/bathy_surf/al_fl_bs.datalist
+fi'''.format(main_dir,main_dir)
 os.system(bs_dlist)
-dem_dlist='touch ' + main_dir + '/software/gridding/al_fl.datalist'
+
+dem_dlist='''if [ ! -e {}/software/gridding/al_fl.datalist ] ; 
+then touch {}/software/gridding/al_fl.datalist
+fi'''.format(main_dir,main_dir)
 os.system(dem_dlist)
+
 
 #ROI for data download
 west_buff=-88.525

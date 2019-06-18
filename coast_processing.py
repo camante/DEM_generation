@@ -59,7 +59,7 @@ roi_str_ogr=sys.argv[3]+' '+sys.argv[4]+' '+sys.argv[5]+' '+sys.argv[6]
 landsat_shp='/media/sf_win_lx/coastal_act/data/coast/landsat_all_NA.shp'
 #script removes disconnected rivers by only keep the largest poly (num_nhd_polys=1). 
 #If need large disconnected rivers,esp. on tile edges that got cut off, make value higher, e.g. num_nhd_polys=2.
-num_nhd_polys='2'
+num_nhd_polys='9'
 
 print "Rasterizing Study Area w Buff"
 rast_study_area_cmd = 'gdal_rasterize -tr 0.00003086420 0.00003086420 -te ' + roi_str_ogr + ' -burn 0 -ot Int16 -co COMPRESS=DEFLATE ' + study_area_shp + ' al_fl_tiles_buff.tif'
