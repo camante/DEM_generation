@@ -54,9 +54,9 @@ sed 's/"//' $dir_name"_"clip_index_url.csv > tmpfile; mv tmpfile $dir_name"_"cli
 #test out with 1 file
 #head -n1 $dir_name"_"clip_index_url.csv > tmpfile; mv tmpfile $dir_name"_"clip_index_url.csv
 
-mkdir -p laz
-mv $dir_name"_"clip_index_url.csv laz/$dir_name"_"clip_index_url.csv
-cd laz
+mkdir -p xyz
+mv $dir_name"_"clip_index_url.csv xyz/$dir_name"_"clip_index_url.csv
+cd xyz
 
 echo "Downloading Data"
 wget -c -nc --input-file $dir_name"_"clip_index_url.csv
