@@ -31,7 +31,10 @@ import glob
 main_dir='/media/sf_external_hd/al_fl'
 code_dir='/media/sf_external_hd/al_fl/code/DEM_generation'
 name_cell_extents='/media/sf_external_hd/al_fl/data/study_area/name_cell_extents.csv'
+bs_dlist='/media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist'
+dem_dlist='/media/sf_external_hd/al_fl/software/gridding/al_fl.datalist'
 coast_shp='/media/sf_external_hd/al_fl/data/coast/al_fl_coast'
+
 #name_cell_extents='/media/sf_external_hd/al_fl/data/study_area/name_cell_extents_test.csv'
 
 os.chdir(main_dir)
@@ -44,20 +47,20 @@ for i in dir_list:
 		os.makedirs(i)
 
 #Create Empty Dummy BS, Bathy Surface and DEM datalists
-dummy_bs_dlist='''if [ ! -e {}/data/bathy/bathy_surf/dummy.datalist ] ; 
+create_dummy_bs_dlist='''if [ ! -e {}/data/bathy/bathy_surf/dummy.datalist ] ; 
 then touch {}/data/bathy/bathy_surf/dummy.datalist
 fi'''.format(main_dir,main_dir)
-os.system(dummy_bs_dlist)
+os.system(create_dummy_bs_dlist)
 
-bs_dlist='''if [ ! -e {}/data/bathy/bathy_surf/al_fl_bs.datalist ] ; 
+create_bs_dlist='''if [ ! -e {}/data/bathy/bathy_surf/al_fl_bs.datalist ] ; 
 then touch {}/data/bathy/bathy_surf/al_fl_bs.datalist
 fi'''.format(main_dir,main_dir)
-os.system(bs_dlist)
+os.system(create_bs_dlist)
 
-dem_dlist='''if [ ! -e {}/software/gridding/al_fl.datalist ] ; 
+create_dem_dlist='''if [ ! -e {}/software/gridding/al_fl.datalist ] ; 
 then touch {}/software/gridding/al_fl.datalist
 fi'''.format(main_dir,main_dir)
-os.system(dem_dlist)
+os.system(create_dem_dlist)
 
 
 #ROI for data download
