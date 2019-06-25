@@ -31,6 +31,7 @@ import glob
 main_dir='/media/sf_external_hd/al_fl'
 code_dir='/media/sf_external_hd/al_fl/code/DEM_generation'
 name_cell_extents='/media/sf_external_hd/al_fl/data/study_area/name_cell_extents.csv'
+coast_shp='/media/sf_external_hd/al_fl/data/coast/al_fl_coast'
 #name_cell_extents='/media/sf_external_hd/al_fl/data/study_area/name_cell_extents_test.csv'
 
 os.chdir(main_dir)
@@ -42,7 +43,12 @@ for i in dir_list:
 		print 'creating subdir', i
 		os.makedirs(i)
 
-#Create Empty Bathy Surface and DEM datalists
+#Create Empty Dummy BS, Bathy Surface and DEM datalists
+dummy_bs_dlist='''if [ ! -e {}/data/bathy/bathy_surf/dummy.datalist ] ; 
+then touch {}/data/bathy/bathy_surf/dummy.datalist
+fi'''.format(main_dir,main_dir)
+os.system(dummy_bs_dlist)
+
 bs_dlist='''if [ ! -e {}/data/bathy/bathy_surf/al_fl_bs.datalist ] ; 
 then touch {}/data/bathy/bathy_surf/al_fl_bs.datalist
 fi'''.format(main_dir,main_dir)
@@ -108,23 +114,23 @@ conv_grd_path=main_dir+'/data/conv_grd/cgrid_mllw2navd88.tif'
 #################################################################
 ######################## COASTLINE ##############################
 #################################################################
-coast_dir_list=['coast']
-for i in coast_dir_list:
-	if not os.path.exists(i):
-		print 'creating subdir', i
-		os.makedirs(i)
+# coast_dir_list=['coast']
+# for i in coast_dir_list:
+# 	if not os.path.exists(i):
+# 		print 'creating subdir', i
+# 		os.makedirs(i)
 
-os.chdir(coast_dir_list[0])
+# os.chdir(coast_dir_list[0])
 
-# #delete python script if it exists
-os.system('[ -e coast_processing.py ] && rm coast_processing.py')
-# #copy python script from DEM_generation code
+# # #delete python script if it exists
+# os.system('[ -e coast_processing.py ] && rm coast_processing.py')
+# # #copy python script from DEM_generation code
 
-os.system('cp {}/coast_processing.py coast_processing.py'.format(code_dir)) 
+# os.system('cp {}/coast_processing.py coast_processing.py'.format(code_dir)) 
 
-print "executing coast_processing script"
-os.system('python coast_processing.py {} {} {}'.format(main_dir,study_area_shp,roi_str_ogr))
-os.chdir('..')
+# print "executing coast_processing script"
+# os.system('python coast_processing.py {} {} {}'.format(main_dir,study_area_shp,roi_str_ogr))
+# os.chdir('..')
 
 #################################################################
 ########################## BATHY ################################
@@ -181,22 +187,22 @@ os.chdir('..')
 #############################################################
 ################## DIGITAL COAST LIDAR ######################
 #############################################################
-# lidar_dir_list=['lidar']
-# for i in lidar_dir_list:
+# dc_lidar_dir_list=['dc_lidar']
+# for i in dc_lidar_dir_list:
 # 	if not os.path.exists(i):
 # 		print 'creating subdir', i
 # 		os.makedirs(i)
 
-# os.chdir(lidar_dir_list[0])
+# os.chdir(dc_lidar_dir_list[0])
 
 # # #delete python script if it exists
-# os.system('[ -e lidar_processing.py ] && rm lidar_processing.py')
+# os.system('[ -e dc_lidar_processing.py ] && rm dc_lidar_processing.py')
 # # #copy python script from DEM_generation code
 
-# os.system('cp {}/lidar_processing.py lidar_processing.py'.format(code_dir)) 
+# os.system('cp {}/dc_lidar_processing.py dc_lidar_processing.py'.format(code_dir)) 
 
-# print "executing lidar_processing script"
-# os.system('python lidar_processing.py {} {}'.format(main_dir,study_area_shp))
+# print "executing dc_lidar_processing script"
+# os.system('python dc_lidar_processing.py {} {}'.format(main_dir,study_area_shp))
 # os.chdir('..')
 
 # #################################################################
@@ -215,8 +221,13 @@ os.chdir('..')
 # #################################################################
 # #################################################################
 # #################################################################
+#Create Bathy Surface 
+if not os.path.exists('bathy/bathy_surf'):
+	os.makedirs('bathy/bathy_surf')
 
-
+os.chdir('bathy/bathy_surf')
+bathy_surf_cmd='create_bs.sh ' + name_cell_extents + ' ' + bs_dlist + ' ' + coast_shp 
+os.system(bathy_surf_cmd)
 
 # #################################################################
 # #################################################################
