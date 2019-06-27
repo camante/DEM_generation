@@ -47,11 +47,6 @@ for i in dir_list:
 		os.makedirs(i)
 
 #Create Empty Dummy BS, Bathy Surface and DEM datalists
-create_dummy_bs_dlist='''if [ ! -e {}/data/bathy/bathy_surf/dummy.datalist ] ; 
-then touch {}/data/bathy/bathy_surf/dummy.datalist
-fi'''.format(main_dir,main_dir)
-os.system(create_dummy_bs_dlist)
-
 create_bs_dlist='''if [ ! -e {}/data/bathy/bathy_surf/al_fl_bs.datalist ] ; 
 then touch {}/data/bathy/bathy_surf/al_fl_bs.datalist
 fi'''.format(main_dir,main_dir)

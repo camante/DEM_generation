@@ -1,6 +1,6 @@
 #!/bin/sh -e
 function help () {
-echo "create_bs- Script that creates a bathy surface at 1 arc-sec for multiple DEM tiles, resamples it back to the target resolution, and converts it xyz. All inputs must be in same, local directory."
+echo "create_bs- Script that creates a bathy surface at 1/3 arc-sec for multiple DEM tiles and resamples it to 1/9th arc-sec converts it xyz for TBDEMs."
 	echo "Usage: $0 name_cell_extents datalist coastline bs_res "
 	echo "* name_cell_extents: <csv file with name,target spatial resolution in decimal degrees,tile_exents in W,E,S,N>"
 	echo "* datalist: <master datalist file that points to individual datasets datalists>"
@@ -23,6 +23,7 @@ if [ ${#@} == 3 ];
 	name_cell_extents=$1
 	datalist_orig=$2
 	coastline_full=$3
+	bs_res=0.00009259259
 
 	#############################################################################
 	#############################################################################
@@ -66,16 +67,27 @@ if [ ${#@} == 3 ];
 	echo "North is" $north_quarter
 	echo
 
+
+	#All gridding is done at 1/3rd arc-sec. Later processing for 1/9th arc-sec.
+
 	#Expand DEM extents by 6 cells to provide overlap between tiles
-	six_cells_target=$(echo "$target_res * 6" | bc -l)
-	#echo six_cells_target is $six_cells_target
-	west=$(echo "$west_quarter - $six_cells_target" | bc -l)
-	north=$(echo "$north_quarter + $six_cells_target" | bc -l)
-	east=$(echo "$east_quarter + $six_cells_target" | bc -l)
-	south=$(echo "$south_quarter - $six_cells_target " | bc -l)
+	six_cells_1_3=$(echo "$bs_res * 6" | bc -l)
+	six_cells_tr=$(echo "$target_res * 6" | bc -l)
+
+	#echo six_cells_1_3 is $six_cells_1_3
+	west=$(echo "$west_quarter - $six_cells_1_3" | bc -l)
+	north=$(echo "$north_quarter + $six_cells_1_3" | bc -l)
+	east=$(echo "$east_quarter + $six_cells_1_3" | bc -l)
+	south=$(echo "$south_quarter - $six_cells_1_3 " | bc -l)
+
+	#Extents with Target Res to create Topo Guide for 1/9th
+	west_tr=$(echo "$west_quarter - $six_cells_tr" | bc -l)
+	north_tr=$(echo "$north_quarter + $six_cells_tr" | bc -l)
+	east_tr=$(echo "$east_quarter + $six_cells_tr" | bc -l)
+	south_tr=$(echo "$south_quarter - $six_cells_tr " | bc -l)
 
 	#Take in a half-cell on all sides so that grid-registered raster edge aligns exactly on desired extent
-	half_cell=$(echo "$target_res / 2" | bc -l)
+	half_cell=$(echo "$bs_res / 2" | bc -l)
 	echo half_cell is $half_cell
 	west_reduced=$(echo "$west + $half_cell" | bc -l)
 	north_reduced=$(echo "$north - $half_cell" | bc -l)
@@ -93,10 +105,18 @@ if [ ${#@} == 3 ];
 	#i.e., 1_9 arc-second
 	x_diff=$(echo "$east - $west" | bc -l)
 	y_diff=$(echo "$north - $south" | bc -l)
-	x_dim=$(echo "$x_diff / $target_res" | bc -l)
-	y_dim=$(echo "$y_diff / $target_res" | bc -l)
+	x_dim=$(echo "$x_diff / $bs_res" | bc -l)
+	y_dim=$(echo "$y_diff / $bs_res" | bc -l)
 	x_dim_int=$(echo "($x_dim+0.5)/1" | bc)
 	y_dim_int=$(echo "($y_dim+0.5)/1" | bc)
+
+	#Rows/Cols with Target Res to create Topo Guide for 1/9th
+	x_diff_tr=$(echo "$east_tr - $west_tr" | bc -l)
+	y_diff_tr=$(echo "$north_tr - $south_tr" | bc -l)
+	x_dim_tr=$(echo "$x_diff_tr / $target_res" | bc -l)
+	y_dim_tr=$(echo "$y_diff_tr / $target_res" | bc -l)
+	x_dim_int_tr=$(echo "($x_dim_tr+0.5)/1" | bc)
+	y_dim_int_tr=$(echo "($y_dim_tr+0.5)/1" | bc)
 
 	#############################################################################
 	#############################################################################
@@ -107,61 +127,62 @@ if [ ${#@} == 3 ];
 	#############################################################################
 
 	#Create Topo Guide for 1/9th Arc-Sec Topobathy DEMs
+	#This adds in values of zero to constain interpolation in inland areas without data.
 
 	if [ "$target_res" = 0.00003086420 ]
 		then 
-		echo -- Creating Topo Guide... 
-		#This adds in values of zero to constain interpolation in inland areas without data.
-		dem_name_tg=$name"_topo_guide"
-		grid_dem_tg=$dem_name_tg".grd"
-		#create empty datalist
-		touch dummy.datalist
-		#echo mb_range is $mb_range
-		# Run mbgrid
-		#echo --Running mbgrid...
-		mbgrid -Idummy.datalist -O$dem_name_tg \
-		$mb_range \
-		-A2 -D$x_dim_int/$y_dim_int -G3 -N \
-		-C0/0 -S0 -F1 -T0.25
+		echo -- Creating Topo Guide...
 
-		# Get Grid Area
-		echo -- Reclasifying any NaNs to 0s
+		#create empty raster with zero values
+		#first, create csv file
+		touch $name"_bbox.csv"
+		echo "lon,lat,elev" >> $name"_bbox.csv"
+		echo "$west_tr,$north_tr,0" >> $name"_bbox.csv"
+		echo "$west_tr,$south_tr,0" >> $name"_bbox.csv"
+		echo "$east_tr,$north_tr,0" >> $name"_bbox.csv"
+		echo "$east_tr,$south_tr,0" >> $name"_bbox.csv"
 
-		#export GDAL_NETCDF_BOTTOMUP=NO
-		#gmt set IO_NC4_CHUNK_SIZE 2
-		gmt grdconvert $grid_dem_tg $grid_dem_tg".tif"=gd:GTiff
+		echo "
+		<OGRVRTDataSource>
+		    <OGRVRTLayer name=$name"_bbox">
+		        <SrcDataSource>$name"_bbox.csv"</SrcDataSource>
+		        <GeometryType>wkbPoint</GeometryType>
+		        <GeometryField encoding="PointFromColumns" x="lon" y="lat" z="elev"/>
+		    </OGRVRTLayer>
+		</OGRVRTDataSource>
+		" >> $name"_bbox.vrt"
 
-		gdal_calc.py -A $grid_dem_tg".tif" --outfile=$grid_dem_tg"_fix_nan.tif" --calc="nan_to_num(A)" --overwrite
-		rm $grid_dem_tg".tif"
+		gdal_grid -a nearest:radius1=0.0:radius2=0.0:angle=0.0:nodata=0.0 -txe $west_tr $east_tr -tye $south_tr $north_tr -outsize $x_dim_int_tr $y_dim_int_tr -of GTiff -ot Float32 -l $name"_bbox" $name"_bbox.vrt" $name"_tg.tif"
+		gdal_edit.py -a_srs epsg:4269 $name"_tg.tif"
+
+		rm $name"_bbox.csv"
+		rm $name"_bbox.vrt"
 
 		echo -- Getting the extents of the raster
-		x_min_tmp=`gmt grdinfo $grid_dem_tg | grep -e "x_min" | awk '{print $3}'`
-		x_max_tmp=`gmt grdinfo $grid_dem_tg | grep -e "x_max" | awk '{print $5}'`
-		y_min_tmp=`gmt grdinfo $grid_dem_tg | grep -e "y_min" | awk '{print $3}'`
-		y_max_tmp=`gmt grdinfo $grid_dem_tg | grep -e "y_max" | awk '{print $5}'`
+		x_min_tmp=`gmt grdinfo $name"_tg.tif" | grep -e "x_min" | awk '{print $3}'`
+		x_max_tmp=`gmt grdinfo $name"_tg.tif" | grep -e "x_max" | awk '{print $5}'`
+		y_min_tmp=`gmt grdinfo $name"_tg.tif" | grep -e "y_min" | awk '{print $3}'`
+		y_max_tmp=`gmt grdinfo $name"_tg.tif" | grep -e "y_max" | awk '{print $5}'`
 
 		#Add on 6 more cells just to make sure there is no edge effects when burnining in shp.
-		x_min=$(echo "$x_min_tmp - $six_cells_target" | bc -l)
-		x_max=$(echo "$x_max_tmp + $six_cells_target" | bc -l)
-		y_min=$(echo "$y_min_tmp - $six_cells_target" | bc -l)
-		y_max=$(echo "$y_max_tmp + $six_cells_target" | bc -l)
-
-		#echo $x_min $y_min $x_max $y_max
+		x_min=$(echo "$x_min_tmp - $six_cells_tr" | bc -l)
+		x_max=$(echo "$x_max_tmp + $six_cells_tr" | bc -l)
+		y_min=$(echo "$y_min_tmp - $six_cells_tr" | bc -l)
+		y_max=$(echo "$y_max_tmp + $six_cells_tr" | bc -l)
 
 		echo -- Clipping coastline shp to grid extents
 		ogr2ogr $name"_coast.shp" $coastline_full".shp" -clipsrc $x_min $y_min $x_max $y_max
 
 		echo -- Setting Topo to -0.1 Prior to Gridding
-		gdal_rasterize -burn -0.1 -l $name"_coast" $name"_coast.shp" $grid_dem_tg"_fix_nan.tif"
-
+		gdal_rasterize -burn -0.1 -l $name"_coast" $name"_coast.shp" $name"_tg.tif"
 
 		#Tiling
 		tile_x_div=12
 		tile_y_div=12
 
 		#get input grid dimensions
-		x_dim=`gdalinfo $grid_dem_tg"_fix_nan.tif" | grep -e "Size is" | awk '{print $3}' | sed 's/.$//'`
-		y_dim=`gdalinfo $grid_dem_tg"_fix_nan.tif" | grep -e "Size is" | awk '{print $4}'`
+		x_dim=`gdalinfo $name"_tg.tif" | grep -e "Size is" | awk '{print $3}' | sed 's/.$//'`
+		y_dim=`gdalinfo $name"_tg.tif" | grep -e "Size is" | awk '{print $4}'`
 
 		#calculate tile grid dimensions
 		tile_dim_x_tmp=$(echo "$x_dim / $tile_x_div" | bc -l)
@@ -187,7 +208,7 @@ if [ ${#@} == 3 ];
 		    echo yoff is $yoff
 		    echo tile_dim_x_int is $tile_dim_x_int
 		    echo tile_dim_y_int $tile_dim_y_int
-		    gdal_translate -of GTiff -a_nodata 999999 -srcwin $xoff $yoff $tile_dim_x_int $tile_dim_y_int $grid_dem_tg"_fix_nan.tif" $tile_name_full -stats
+		    gdal_translate -of GTiff -a_nodata 999999 -srcwin $xoff $yoff $tile_dim_x_int $tile_dim_y_int $name"_tg.tif" $tile_name_full -stats
 		    z_min=`gmt grdinfo $tile_name_full | grep -e "z_min" | awk '{print $3}'`
 		    echo "z_min is" $z_min
 		    if (( $(echo "$z_min > -0.000001" | bc -l) ));
@@ -210,7 +231,7 @@ if [ ${#@} == 3 ];
 		  xoff=$(echo "$xoff+$tile_dim_x_int" | bc)
 		done
 		
-		rm $grid_dem_tg"_fix_nan.tif"
+		rm $name"_tg.tif"
 		
 		echo -- Creating Datalist for Topo Guide
 		cd topo_guide
@@ -219,8 +240,8 @@ if [ ${#@} == 3 ];
 		cat *guide_xyz* >  $name"_topo_guide_all.xyz"
 		rm *guide_xyz*
 
-		echo -- Randomly Sample 10000 xyz pnts
-		shuf -n 10000 $name"_topo_guide_all.xyz" > $name"_tguide.xyz"
+		echo -- Randomly Sampling 100000 xyz pnts
+		shuf -n 100000 $name"_topo_guide_all.xyz" > $name"_tguide.xyz"
 
 		rm $name"_topo_guide_all.xyz"
 
@@ -232,9 +253,6 @@ if [ ${#@} == 3 ];
 		echo
 		echo "All done"
 		cd .. 
-		rm $grid_dem_tg
-		rm $dem_name_tg".mb-1"
-		rm $grid_dem_tg".tif.aux.xml"
 
 	else
 		echo "DEM is bathy 1/3rd, no need for topo guide"
@@ -315,6 +333,18 @@ if [ ${#@} == 3 ];
 			rm $grid_dem".tif"
 			rm $grid_dem"_fix_nan.tif"
 
+			if [ "$target_res" = 0.00003086420 ]
+			then 
+				echo "Resampling to 1/9th Resolution"
+				gdalwarp $grid_dem"_rc.tif" -r cubicspline -tr $target_res $target_res -t_srs EPSG:4269 $grid_dem"_rc_tr_tmp.tif" -overwrite
+				rm $grid_dem"_rc.tif"
+				
+				echo "Subsetting to 1/9th arc-sec extents"
+				gdal_translate $grid_dem"_rc_tr_tmp.tif" -srcwin 12 12 8112 8112 -a_srs EPSG:4269 -a_nodata -9999 -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" -co "TILED=YES" $grid_dem"_rc.tif"
+			else
+				echo "Target res is 1/3rd arc-sec, no resampling needed."
+			fi
+
 			echo -- Masking out Topo
 			gdal_rasterize -burn 1 -l $name"_coast" $name"_coast.shp" $grid_dem"_rc.tif"
 
@@ -345,8 +375,6 @@ if [ ${#@} == 3 ];
 			mv $name"_coast.prj" coast_shp/$name"_coast.prj"
 			mv $name"_coast.shx" coast_shp/$name"_coast.shx"
 			mv $datalist save_datalists/$datalist
-
-
 
 			#Convert tif to xyz for 1/9th arc-sec
 
