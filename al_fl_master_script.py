@@ -229,7 +229,9 @@ if not os.path.exists('bathy/bathy_surf'):
 	os.makedirs('bathy/bathy_surf')
 
 os.chdir('bathy/bathy_surf')
-bathy_surf_cmd='create_bs.sh ' + name_cell_extents + ' ' + bs_dlist + ' ' + coast_shp 
+bathy_surf_cmd='create_bs.sh ' + name_cell_extents + ' ' + bs_dlist + ' ' + coast_shp
+#create_bs.sh /media/sf_external_hd/al_fl/data/study_area/name_cell_extents.csv /media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist /media/sf_external_hd/al_fl/data/coast/al_fl_coast
+#create_bs.sh name_cell_extents_test.csv /media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist /media/sf_external_hd/al_fl/data/coast/al_fl_coast
 os.system(bathy_surf_cmd)
 
 # #################################################################
