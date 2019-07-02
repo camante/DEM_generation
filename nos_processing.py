@@ -41,7 +41,8 @@ roi_str=sys.argv[2]
 conv_grd_path=sys.argv[3]
 
 chunk_size=500
-resamp_bag='yes'
+#resamp_bag='yes'
+resamp_bag='no'
 resamp_res=0.000030864199
 
 # print 'Downloading NOS / BAG Surveys'
@@ -92,9 +93,12 @@ resamp_res=0.000030864199
 
 os.chdir('nos_bag')
 
-# print "Converting BAG to Resampled tif and to XYZ"
-# bag2tif2chunks2xyz_cmd='bag2tif2chunks2xyz.sh ' +str(chunk_size) + ' ' + str(resamp_bag) + ' ' + str(resamp_res)
-# os.system(bag2tif2chunks2xyz_cmd)
+#print "Converting BAG to Resampled tif and to XYZ"
+#bag2tif2chunks2xyz_cmd='bag2tif2chunks2xyz.sh ' +str(chunk_size) + ' ' + str(resamp_bag) + ' ' + str(resamp_res)
+
+print "Converting BAG to tif and to XYZ"
+bag2tif2chunks2xyz_cmd='bag2tif2chunks2xyz.sh ' +str(chunk_size) + ' ' + str(resamp_bag) + ' ' + str(resamp_res)
+os.system(bag2tif2chunks2xyz_cmd)
 
 print "Converting BAG to NAVD88"
 os.chdir('xyz')

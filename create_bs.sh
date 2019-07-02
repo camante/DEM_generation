@@ -1,10 +1,14 @@
 #!/bin/sh -e
 function help () {
 echo "create_bs- Script that creates a bathy surface at 1/3 arc-sec for multiple DEM tiles and resamples it to 1/9th arc-sec converts it xyz for TBDEMs."
-	echo "Usage: $0 name_cell_extents datalist coastline bs_res "
+	echo "Usage: $0 name_cell_extents datalist coastline bs_res"
 	echo "* name_cell_extents: <csv file with name,target spatial resolution in decimal degrees,tile_exents in W,E,S,N>"
 	echo "* datalist: <master datalist file that points to individual datasets datalists>"
 	echo "* coastline: <coastline shapefile for clipping. Don't include .shp extension >"
+	echo "* bs_res: <bs cell size in arc-seconds>
+	0.00003086420 = 1/9th arc-second 
+	0.00009259259 = 1/3rd arc-second
+	0.00027777777 = 1 arc-second"
 }
 
 #see if 3 parameters were provided
@@ -23,7 +27,7 @@ if [ ${#@} == 3 ];
 	name_cell_extents=$1
 	datalist_orig=$2
 	coastline_full=$3
-	bs_res=0.00009259259
+	bs_res=$4
 
 	#############################################################################
 	#############################################################################
@@ -126,10 +130,9 @@ if [ ${#@} == 3 ];
 	#############################################################################
 	#############################################################################
 
-	#Create Topo Guide for 1/9th Arc-Sec Topobathy DEMs
+	#Create Topo Guide for 1/9th Arc-Sec Topobathy DEMs if they don't already exist
 	#This adds in values of zero to constain interpolation in inland areas without data.
-
-	if [ "$target_res" = 0.00003086420 ]
+	if [[ "$target_res" = 0.00003086420 && ! -e "topo_guide/"$name"_tguide.xyz" ]]
 		then 
 		echo -- Creating Topo Guide...
 
@@ -341,6 +344,8 @@ if [ ${#@} == 3 ];
 				
 				echo "Subsetting to 1/9th arc-sec extents"
 				gdal_translate $grid_dem"_rc_tr_tmp.tif" -srcwin 12 12 8112 8112 -a_srs EPSG:4269 -a_nodata -9999 -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" -co "TILED=YES" $grid_dem"_rc.tif"
+				rm $grid_dem"_rc_tr_tmp.tif"
+
 			else
 				echo "Target res is 1/3rd arc-sec, no resampling needed."
 			fi

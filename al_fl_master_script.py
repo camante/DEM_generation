@@ -31,11 +31,11 @@ import glob
 main_dir='/media/sf_external_hd/al_fl'
 code_dir='/media/sf_external_hd/al_fl/code/DEM_generation'
 name_cell_extents='/media/sf_external_hd/al_fl/data/study_area/name_cell_extents.csv'
+#name_cell_extents='/media/sf_external_hd/al_fl/data/study_area/name_cell_extents_test.csv'
 bs_dlist='/media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist'
 dem_dlist='/media/sf_external_hd/al_fl/software/gridding/al_fl.datalist'
 coast_shp='/media/sf_external_hd/al_fl/data/coast/al_fl_coast'
-
-#name_cell_extents='/media/sf_external_hd/al_fl/data/study_area/name_cell_extents_test.csv'
+bs_res=0.00009259259
 
 os.chdir(main_dir)
 print 'Main Directory is', os.getcwd()
@@ -134,14 +134,14 @@ conv_grd_path=main_dir+'/data/conv_grd/cgrid_mllw2navd88.tif'
 ########################## BATHY ################################
 #################################################################
 #Creating main subdirectories
-# os.chdir('bathy')
+os.chdir('bathy')
 
-# bathy_dir_list=['usace_dredge', 'mb', 'nos']
-# #bathy_dir_list=['/media/sf_external_hd/test/usace_dredge']
-# for i in bathy_dir_list:
-# 	if not os.path.exists(i):
-# 		print 'creating subdir', i
-# 		os.makedirs(i)
+bathy_dir_list=['usace_dredge', 'mb', 'nos']
+#bathy_dir_list=['/media/sf_external_hd/test/usace_dredge']
+for i in bathy_dir_list:
+	if not os.path.exists(i):
+		print 'creating subdir', i
+		os.makedirs(i)
 
 ######################## USACE DREDGE #############################
 # os.chdir(bathy_dir_list[0])
@@ -169,18 +169,18 @@ conv_grd_path=main_dir+'/data/conv_grd/cgrid_mllw2navd88.tif'
 # os.chdir('..')
 # ####
 ########################## NOS/BAG ################################
-# os.chdir(bathy_dir_list[2])
-# print 'Current Directory is', os.getcwd()
+os.chdir(bathy_dir_list[2])
+print 'Current Directory is', os.getcwd()
 
-# # #delete python script if it exists
-# os.system('[ -e nos_processing.py ] && rm nos_processing.py')
-# # #copy python script from DEM_generation code
+# #delete python script if it exists
+os.system('[ -e nos_processing.py ] && rm nos_processing.py')
+# #copy python script from DEM_generation code
 
-# os.system('cp {}/nos_processing.py nos_processing.py'.format(code_dir)) 
+os.system('cp {}/nos_processing.py nos_processing.py'.format(code_dir)) 
 
-# print "executing nos_processing script"
-# os.system('python nos_processing.py {} {} {}'.format(main_dir,roi_str,conv_grd_path))
-# os.chdir('..')
+print "executing nos_processing script"
+os.system('python nos_processing.py {} {} {}'.format(main_dir,roi_str,conv_grd_path))
+os.chdir('..')
 
 #############################################################
 ################## DIGITAL COAST LIDAR ######################
@@ -219,15 +219,15 @@ conv_grd_path=main_dir+'/data/conv_grd/cgrid_mllw2navd88.tif'
 # #################################################################
 # #################################################################
 # #################################################################
-#Create Bathy Surface 
-if not os.path.exists('bathy/bathy_surf'):
-	os.makedirs('bathy/bathy_surf')
+# #Create Bathy Surface 
+# if not os.path.exists('bathy/bathy_surf'):
+# 	os.makedirs('bathy/bathy_surf')
 
-os.chdir('bathy/bathy_surf')
-bathy_surf_cmd='create_bs.sh ' + name_cell_extents + ' ' + bs_dlist + ' ' + coast_shp
-#create_bs.sh /media/sf_external_hd/al_fl/data/study_area/name_cell_extents.csv /media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist /media/sf_external_hd/al_fl/data/coast/al_fl_coast
-#create_bs.sh name_cell_extents_test.csv /media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist /media/sf_external_hd/al_fl/data/coast/al_fl_coast
-os.system(bathy_surf_cmd)
+# os.chdir('bathy/bathy_surf')
+# bathy_surf_cmd='create_bs.sh ' + name_cell_extents + ' ' + bs_dlist + ' ' + coast_shp + ' ' + bs_res
+# #create_bs.sh /media/sf_external_hd/al_fl/data/study_area/name_cell_extents.csv /media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist /media/sf_external_hd/al_fl/data/coast/al_fl_coast
+# #create_bs.sh name_cell_extents_test.csv /media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist /media/sf_external_hd/al_fl/data/coast/al_fl_coast
+# os.system(bathy_surf_cmd)
 
 # #################################################################
 # #################################################################
