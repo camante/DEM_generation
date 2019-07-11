@@ -34,10 +34,13 @@ name_cell_extents='/media/sf_external_hd/al_fl/data/study_area/name_cell_extents
 #name_cell_extents='/media/sf_external_hd/al_fl/data/study_area/name_cell_extents_test.csv'
 bs_dlist='/media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist'
 dem_dlist='/media/sf_external_hd/al_fl/software/gridding/al_fl.datalist'
+bs_path='/media/sf_external_hd/al_fl/data/bathy/bathy_surf/tifs'
 coast_shp='/media/sf_external_hd/al_fl/data/coast/al_fl_coast'
 bs_res=0.00009259259
 
+os.system('cd')
 os.chdir(main_dir)
+
 print 'Main Directory is', os.getcwd()
 #Creating main subdirectories
 dir_list=['data', 'docs', 'software', 'software/gridding']
@@ -88,11 +91,11 @@ study_area_shp=main_dir + '/data/study_area/al_fl_tiles_buff.shp'
 if not os.path.exists('data/conv_grd'):
 	os.makedirs('data/conv_grd')
 
-os.chdir('data/conv_grd')
-#print "Creating mllw2navd88 conversion grid"
-#conv_grd_cmd='dem cgrid -i mllw -o navd88 -c -E 1s -R' +roi_str
-#os.system(conv_grd_cmd)
-os.chdir('..')
+# os.chdir('data/conv_grd')
+# print "Creating mllw2navd88 conversion grid"
+# conv_grd_cmd='dem cgrid -i mllw -o navd88 -c -E 1s -R' +roi_str
+# os.system(conv_grd_cmd)
+
 conv_grd_path=main_dir+'/data/conv_grd/cgrid_mllw2navd88.tif'
 #################################################################
 #################################################################
@@ -112,6 +115,10 @@ conv_grd_path=main_dir+'/data/conv_grd/cgrid_mllw2navd88.tif'
 #################################################################
 ######################## COASTLINE ##############################
 #################################################################
+os.system('cd')
+os.chdir(main_dir)
+os.chdir('data')
+
 # coast_dir_list=['coast']
 # for i in coast_dir_list:
 # 	if not os.path.exists(i):
@@ -133,15 +140,16 @@ conv_grd_path=main_dir+'/data/conv_grd/cgrid_mllw2navd88.tif'
 #################################################################
 ########################## BATHY ################################
 #################################################################
-#Creating main subdirectories
-os.chdir('bathy')
+os.system('cd')
+os.chdir(main_dir+'/data/bathy')
 
-bathy_dir_list=['usace_dredge', 'mb', 'nos']
-#bathy_dir_list=['/media/sf_external_hd/test/usace_dredge']
-for i in bathy_dir_list:
-	if not os.path.exists(i):
-		print 'creating subdir', i
-		os.makedirs(i)
+#Creating main subdirectories
+# bathy_dir_list=['usace_dredge', 'mb', 'nos']
+# #bathy_dir_list=['/media/sf_external_hd/test/usace_dredge']
+# for i in bathy_dir_list:
+# 	if not os.path.exists(i):
+# 		print 'creating subdir', i
+# 		os.makedirs(i)
 
 ######################## USACE DREDGE #############################
 # os.chdir(bathy_dir_list[0])
@@ -154,8 +162,10 @@ for i in bathy_dir_list:
 
 # print "executing usace_dredge_processing script"
 # os.system('python usace_dredge_processing.py {} {}'.format(main_dir, conv_grd_path))
-# os.chdir('..')
+
 ######################## Multibeam #############################
+# os.system('cd')
+# os.chdir(main_dir+'/data/bathy')
 # os.chdir(bathy_dir_list[1])
 # print 'Current Directory is', os.getcwd()
 
@@ -166,25 +176,51 @@ for i in bathy_dir_list:
 
 # print "executing mb_processing script"
 # os.system('python mb_processing.py {} {}'.format(main_dir, name_cell_extents))
-# os.chdir('..')
 # ####
 ########################## NOS/BAG ################################
-os.chdir(bathy_dir_list[2])
-print 'Current Directory is', os.getcwd()
+# os.system('cd')
+# os.chdir(main_dir+'/data/bathy')
+# os.chdir(bathy_dir_list[2])
+# print 'Current Directory is', os.getcwd()
 
-# #delete python script if it exists
-os.system('[ -e nos_processing.py ] && rm nos_processing.py')
-# #copy python script from DEM_generation code
+# # #delete python script if it exists
+# os.system('[ -e nos_processing.py ] && rm nos_processing.py')
+# # #copy python script from DEM_generation code
 
-os.system('cp {}/nos_processing.py nos_processing.py'.format(code_dir)) 
+# os.system('cp {}/nos_processing.py nos_processing.py'.format(code_dir)) 
 
-print "executing nos_processing script"
-os.system('python nos_processing.py {} {} {}'.format(main_dir,roi_str,conv_grd_path))
-os.chdir('..')
+# print "executing nos_processing script"
+# os.system('python nos_processing.py {} {} {}'.format(main_dir,roi_str,conv_grd_path))
 
 #############################################################
 ################## DIGITAL COAST LIDAR ######################
 #############################################################
+os.system('cd')
+os.chdir(main_dir+'/data')
+
+dc_lidar_dir_list=['dc_lidar']
+for i in dc_lidar_dir_list:
+	if not os.path.exists(i):
+		print 'creating subdir', i
+		os.makedirs(i)
+
+os.chdir(dc_lidar_dir_list[0])
+
+# #delete python script if it exists
+os.system('[ -e dc_lidar_processing.py ] && rm dc_lidar_processing.py')
+# #copy python script from DEM_generation code
+
+os.system('cp {}/dc_lidar_processing.py dc_lidar_processing.py'.format(code_dir)) 
+
+print "executing dc_lidar_processing script"
+os.system('python dc_lidar_processing.py {} {}'.format(main_dir,study_area_shp))
+
+#############################################################
+################## TOPO NOT ON DIGITAL COAST ################
+#############################################################
+# os.system('cd')
+# os.chdir(main_dir+'/data')
+
 # dc_lidar_dir_list=['dc_lidar']
 # for i in dc_lidar_dir_list:
 # 	if not os.path.exists(i):
@@ -203,6 +239,7 @@ os.chdir('..')
 # os.system('python dc_lidar_processing.py {} {}'.format(main_dir,study_area_shp))
 # os.chdir('..')
 
+
 # #################################################################
 # #################################################################
 # #################################################################
@@ -219,14 +256,17 @@ os.chdir('..')
 # #################################################################
 # #################################################################
 # #################################################################
-# #Create Bathy Surface 
-# if not os.path.exists('bathy/bathy_surf'):
-# 	os.makedirs('bathy/bathy_surf')
+# os.system('cd')
+# os.chdir(main_dir+'/data/bathy')
 
-# os.chdir('bathy/bathy_surf')
+# #Create Bathy Surface 
+# if not os.path.exists('bathy_surf'):
+# 	os.makedirs('bathy_surf')
+
+# os.chdir('bathy_surf')
 # bathy_surf_cmd='create_bs.sh ' + name_cell_extents + ' ' + bs_dlist + ' ' + coast_shp + ' ' + bs_res
-# #create_bs.sh /media/sf_external_hd/al_fl/data/study_area/name_cell_extents.csv /media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist /media/sf_external_hd/al_fl/data/coast/al_fl_coast
-# #create_bs.sh name_cell_extents_test.csv /media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist /media/sf_external_hd/al_fl/data/coast/al_fl_coast
+# #create_bs.sh /media/sf_external_hd/al_fl/data/study_area/name_cell_extents.csv /media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist /media/sf_external_hd/al_fl/data/coast/al_fl_coast 0.00009259259
+# #create_bs.sh name_cell_extents_test.csv /media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist /media/sf_external_hd/al_fl/data/coast/al_fl_coast 0.00009259259
 # os.system(bathy_surf_cmd)
 
 # #################################################################
@@ -236,4 +276,11 @@ os.chdir('..')
 # #################################################################
 # #################################################################
 # #################################################################
+# #Create DEM
+# os.system('cd')
+# os.chdir(main_dir)
+# os.chdir('software/gridding')
 
+# create_dem_cmd='create_dem.sh ' + name_cell_extents + ' ' + dem_dlist + ' ' + bs_path + ' ' + str(5)
+# #create_dem.sh /media/sf_external_hd/al_fl/data/study_area/name_cell_extents.csv /media/sf_external_hd/al_fl/software/gridding/al_fl.datalist /media/sf_external_hd/al_fl/data/bathy/bathy_surf/tifs 5
+# os.system(bathy_surf_cmd)

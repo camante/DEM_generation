@@ -13,7 +13,7 @@ echo "create_bs- Script that creates a bathy surface at 1/3 arc-sec for multiple
 
 #see if 3 parameters were provided
 #show help if not
-if [ ${#@} == 3 ]; 
+if [ ${#@} == 4 ]; 
 	then
 	mkdir -p xyz
 	mkdir -p topo_guide
@@ -258,7 +258,7 @@ if [ ${#@} == 3 ];
 		cd .. 
 
 	else
-		echo "DEM is bathy 1/3rd, no need for topo guide"
+		echo "Topo guide already exists or DEM is bathy 1/3rd, no need for topo guide"
 	fi
 
 
@@ -285,30 +285,6 @@ if [ ${#@} == 3 ];
 	z_max=`gmt grdinfo $grid_dem | grep -e "z_max" | awk '{print $5}'`
 	echo "z_min is" $z_min
 	echo "z_max is" $z_max
-
-	#If 1/3rd, I need to create shp.
-	if [ "$target_res" != 0.00003086420 ]
-	then
-		echo -- Getting the extents of the raster
-		x_min_tmp=`gmt grdinfo $grid_dem | grep -e "x_min" | awk '{print $3}'`
-		x_max_tmp=`gmt grdinfo $grid_dem | grep -e "x_max" | awk '{print $5}'`
-		y_min_tmp=`gmt grdinfo $grid_dem | grep -e "y_min" | awk '{print $3}'`
-		y_max_tmp=`gmt grdinfo $grid_dem | grep -e "y_max" | awk '{print $5}'`
-
-		#Add on 6 more cells just to make sure there is no edge effects when burnining in shp.
-		x_min=$(echo "$x_min_tmp - $six_cells_target" | bc -l)
-		x_max=$(echo "$x_max_tmp + $six_cells_target" | bc -l)
-		y_min=$(echo "$y_min_tmp - $six_cells_target" | bc -l)
-		y_max=$(echo "$y_max_tmp + $six_cells_target" | bc -l)
-
-		#echo $x_min $y_min $x_max $y_max
-		echo -- Clipping coastline shp to grid extents
-		ogr2ogr $name"_coast.shp" $coastline_full".shp" -clipsrc $x_min $y_min $x_max $y_max
-
-	else
-		echo -- Already created shp for 1/9th arc-sec DEM topo guide
-	fi
-
 
 	gmt grdconvert $grid_dem $grid_dem".tif"=gd:GTiff
 
@@ -349,6 +325,23 @@ if [ ${#@} == 3 ];
 			else
 				echo "Target res is 1/3rd arc-sec, no resampling needed."
 			fi
+
+			#Create Shp for both 1/3rd and 1/9th
+			echo -- Getting the extents of the raster
+			x_min_tmp=`gmt grdinfo $grid_dem"_rc.tif" | grep -e "x_min" | awk '{print $3}'`
+			x_max_tmp=`gmt grdinfo $grid_dem"_rc.tif" | grep -e "x_max" | awk '{print $5}'`
+			y_min_tmp=`gmt grdinfo $grid_dem"_rc.tif" | grep -e "y_min" | awk '{print $3}'`
+			y_max_tmp=`gmt grdinfo $grid_dem"_rc.tif" | grep -e "y_max" | awk '{print $5}'`
+
+			#Add on 6 more cells just to make sure there is no edge effects when burnining in shp.
+			x_min=$(echo "$x_min_tmp - $six_cells_1_3" | bc -l)
+			x_max=$(echo "$x_max_tmp + $six_cells_1_3" | bc -l)
+			y_min=$(echo "$y_min_tmp - $six_cells_1_3" | bc -l)
+			y_max=$(echo "$y_max_tmp + $six_cells_1_3" | bc -l)
+
+			#echo $x_min $y_min $x_max $y_max
+			echo -- Clipping coastline shp to grid extents
+			ogr2ogr $name"_coast.shp" $coastline_full".shp" -clipsrc $x_min $y_min $x_max $y_max -overwrite
 
 			echo -- Masking out Topo
 			gdal_rasterize -burn 1 -l $name"_coast" $name"_coast.shp" $grid_dem"_rc.tif"

@@ -103,6 +103,7 @@ os.system(bag2tif2chunks2xyz_cmd)
 print "Converting BAG to NAVD88"
 os.chdir('xyz')
 bag2navd88_cmd="vert_conv.sh " + conv_grd_path + "  navd88"
+#vert_conv.sh /media/sf_external_hd/al_fl/data/conv_grd/cgrid_mllw2navd88.tif navd88
 os.system(bag2navd88_cmd)
 
 print "Creating BAG Datalist"
