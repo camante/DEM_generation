@@ -30,8 +30,8 @@ import glob
 #################################################################
 main_dir='/media/sf_external_hd/al_fl'
 code_dir='/media/sf_external_hd/al_fl/code/DEM_generation'
-name_cell_extents='/media/sf_external_hd/al_fl/data/study_area/name_cell_extents.csv'
-#name_cell_extents='/media/sf_external_hd/al_fl/data/study_area/name_cell_extents_test.csv'
+name_cell_extents_bs='/media/sf_external_hd/al_fl/data/bathy/bathy_surf/name_cell_extents_bs.csv'
+name_cell_extents_dem='/media/sf_external_hd/al_fl/software/gridding/name_cell_extents_dem.csv'
 bs_dlist='/media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist'
 dem_dlist='/media/sf_external_hd/al_fl/software/gridding/al_fl.datalist'
 bs_path='/media/sf_external_hd/al_fl/data/bathy/bathy_surf/tifs'
@@ -264,8 +264,8 @@ os.system('python dc_lidar_processing.py {} {}'.format(main_dir,study_area_shp))
 # 	os.makedirs('bathy_surf')
 
 # os.chdir('bathy_surf')
-# bathy_surf_cmd='create_bs.sh ' + name_cell_extents + ' ' + bs_dlist + ' ' + coast_shp + ' ' + bs_res
-# #create_bs.sh /media/sf_external_hd/al_fl/data/study_area/name_cell_extents.csv /media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist /media/sf_external_hd/al_fl/data/coast/al_fl_coast 0.00009259259
+# bathy_surf_cmd='create_bs.sh ' + name_cell_extents_bs + ' ' + bs_dlist + ' ' + coast_shp + ' ' + bs_res
+# #create_bs.sh /media/sf_external_hd/al_fl/data/bathy/bathy_surf/name_cell_extents_bs.csv /media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist /media/sf_external_hd/al_fl/data/coast/al_fl_coast 0.00009259259
 # #create_bs.sh name_cell_extents_test.csv /media/sf_external_hd/al_fl/data/bathy/bathy_surf/al_fl_bs.datalist /media/sf_external_hd/al_fl/data/coast/al_fl_coast 0.00009259259
 # os.system(bathy_surf_cmd)
 
@@ -281,6 +281,6 @@ os.system('python dc_lidar_processing.py {} {}'.format(main_dir,study_area_shp))
 # os.chdir(main_dir)
 # os.chdir('software/gridding')
 
-# create_dem_cmd='create_dem.sh ' + name_cell_extents + ' ' + dem_dlist + ' ' + bs_path + ' ' + str(5)
-# #create_dem.sh /media/sf_external_hd/al_fl/data/study_area/name_cell_extents.csv /media/sf_external_hd/al_fl/software/gridding/al_fl.datalist /media/sf_external_hd/al_fl/data/bathy/bathy_surf/tifs 5
+# create_dem_cmd='create_dem.sh ' + name_cell_extents_dem + ' ' + dem_dlist + ' ' + bs_path + ' ' + str(5)
+# #create_dem.sh /media/sf_external_hd/al_fl/software/gridding/name_cell_extents_dem.csv /media/sf_external_hd/al_fl/software/gridding/al_fl.datalist /media/sf_external_hd/al_fl/data/bathy/bathy_surf/tifs 5
 # os.system(bathy_surf_cmd)
