@@ -1,44 +1,29 @@
 #!/bin/sh -e
 function help () {
-echo "process_lidar.sh Script to download and process lidar from NOAA's Digital Coast in a provided ROI shapefile"
-	echo "Usage: $0 main_dir download_csv roi_shapefile "
+echo "process_lidar.sh Script to download and process lidar from NOAA's Digital Coast with a provided, manually edited shapefile of laz tiles"
+	echo "Usage: $0 main_dir process_csv"
 	echo "* main_dir: <main directory to output datalists, eg, /media/sf_external_hd/al_fl>"
-	echo "* download_csv: <csv w urls of bulk_download tileindex.zip>"
-	echo "* roi_shp: <user-provided shp of your ROI>"
+	echo "* process_csv: <csv w paths to missing shps, eg., /media/sf_external_hd/al_fl/data/dc_lidar_missing_download_process.csv>"
 }
 
 #see if 2 parameters were provided
 #show help if not
-if [ ${#@} == 3 ]; 
+if [ ${#@} == 2 ]; 
 then
 main_dir=$1
-data_url=$2
-roi_shp=$3
+process_csv=$2
 
 # Get URLs from csv
 IFS=,
-sed -n '/^ *[^#]/p' $data_url |
+sed -n '/^ *[^#]/p' $process_csv |
 while read -r line
 do
-data_url=$(echo $line | awk '{print $1}')
-first_class=$(echo $line | awk '{print $2}')
-second_class=$(echo $line | awk '{print $3}')
+dir_name=$(echo $line | awk '{print $1}')
+shp_name=$(echo $line | awk '{print $2}')
+first_class=$(echo $line | awk '{print $3}')
+second_class=$(echo $line | awk '{print $4}')
 
-dir_name=$(echo $(basename $(dirname $data_url)))
-mkdir -p $dir_name
 cd $dir_name
-
-echo "Downloading Index Shp"
-wget $data_url
-
-echo "Unzipping Index Shp"
-unzip tileindex.zip
-
-shp_name=$(ls *.shp)
-echo "Index Shp name is " $shp_name
-
-echo "Clipping Index Shp to ROI shp"
-ogr2ogr -clipsrc $roi_shp $dir_name"_"clip_index.shp $shp_name
 
 sql_var=$dir_name"_clip_index"
 echo "Dropping all Columns but URL"

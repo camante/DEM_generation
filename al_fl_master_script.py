@@ -215,6 +215,29 @@ os.system('cp {}/dc_lidar_processing.py dc_lidar_processing.py'.format(code_dir)
 print "executing dc_lidar_processing script"
 os.system('python dc_lidar_processing.py {} {}'.format(main_dir,study_area_shp))
 
+
+os.system('cd')
+os.chdir(main_dir+'/data/dc_lidar')
+
+dc_lidar_missing_dir_list=['missing']
+for i in dc_lidar_missing_dir_list:
+	if not os.path.exists(i):
+		print 'creating subdir', i
+		os.makedirs(i)
+
+
+os.chdir(dc_lidar_missing_dir_list[0])
+
+# #delete python script if it exists
+os.system('[ -e dc_lidar_missing_processing.py ] && rm dc_lidar_missing_processing.py')
+# #copy python script from DEM_generation code
+
+os.system('cp {}/dc_lidar_missing_processing.py dc_lidar_missing_processing.py'.format(code_dir)) 
+
+print "executing dc_lidar_missing_processing script"
+os.system('python dc_lidar_missing_processing.py {}'.format(main_dir))
+
+
 #############################################################
 ################## TOPO NOT ON DIGITAL COAST ################
 #############################################################
@@ -283,4 +306,5 @@ os.system('python dc_lidar_processing.py {} {}'.format(main_dir,study_area_shp))
 
 # create_dem_cmd='create_dem.sh ' + name_cell_extents_dem + ' ' + dem_dlist + ' ' + bs_path + ' ' + str(5)
 # #create_dem.sh /media/sf_external_hd/al_fl/software/gridding/name_cell_extents_dem.csv /media/sf_external_hd/al_fl/software/gridding/al_fl.datalist /media/sf_external_hd/al_fl/data/bathy/bathy_surf/tifs 5
+#create_dem.sh /media/sf_external_hd/al_fl/software/gridding/name_cell_extents_dem.csv /media/sf_external_hd/al_fl/software/gridding/al_fl.datalist 5
 # os.system(bathy_surf_cmd)

@@ -53,10 +53,67 @@ main_dir='/media/sf_external_hd/al_fl'
 # add_to_master_cmd='echo ' + current_dir + '/2007_app_river_fl.datalist -1 1 >> ' + main_dir + '/software/gridding/al_fl.datalist' 
 # os.system(add_to_master_cmd)
 
+if not os.path.exists('topo/coned'):
+	os.makedirs('topo/coned')
+
+os.chdir('topo/coned')
+#Manually download from https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/topo/downloads/Topobathy/TOPOBATHY_MOBILE_BAY_ELEV_METERS.zip
+#unzipped, and renamed to usgs_mobile.tif
+
+#Tile
+os.system('tif2chunks_clip_2xyz.sh 500 no 0.000030864199 al_fl_coast_coned yes')
 
 
-# if not os.path.exists('topo/ned'):
-# 	os.makedirs('topo/ned')
+print "Creating Datalist"
+os.chdir('xyz')
+create_datalist_cmd='create_datalist.sh coned_mobile_2013'
+os.system(create_datalist_cmd)
 
-# os.chdir('topo/ned)
+print "Added Datalist to Master Datalist"
+current_dir=os.getcwd()
+add_to_master_cmd='echo ' + current_dir + '/coned_mobile_2013.datalist -1 0.001 >> ' + main_dir + '/software/gridding/al_fl.datalist' 
+#echo "/media/sf_external_hd/al_fl/data/topo/coned/xyz/coned_mobile_2013.datalist -1 0.001" >> /media/sf_external_hd/al_fl/software/gridding/al_fl.datalist
+os.system(add_to_master_cmd)
+
+
+#need to change dir
+
+if not os.path.exists('topo/ncei'):
+	os.makedirs('topo/ncei')
+
+os.chdir('topo/ncei')
+os.system('tif2chunks_clip_2xyz.sh 500 yes 0.000030864199 al_fl_coast_ncei yes')
+
+print "Creating Datalist"
+os.chdir('xyz')
+create_datalist_cmd='create_datalist.sh ncei_mobile_2009'
+os.system(create_datalist_cmd)
+
+print "Added Datalist to Master Datalist"
+current_dir=os.getcwd()
+add_to_master_cmd='echo ' + current_dir + '/ncei_mobile_2009.datalist -1 0.0001 >> ' + main_dir + '/software/gridding/al_fl.datalist' 
+#echo "/media/sf_external_hd/al_fl/data/topo/ncei/xyz/ncei_mobile_2009.datalist -1 0.0001" >> /media/sf_external_hd/al_fl/software/gridding/al_fl.datalist
+os.system(add_to_master_cmd)
+
+
+#need to change dir
+
+if not os.path.exists('topo/ned'):
+	os.makedirs('topo/ned')
+
+os.chdir('topo/ned')
+# Manually downloaded from National Map, but could do programatically here
+os.system('tif2chunks_clip_2xyz.sh 500 yes 0.000030864199 al_fl_coast_ned yes')
+
+print "Creating Datalist"
+os.chdir('xyz')
+create_datalist_cmd='create_datalist.sh ned'
+os.system(create_datalist_cmd)
+
+print "Added Datalist to Master Datalist"
+current_dir=os.getcwd()
+add_to_master_cmd='echo ' + current_dir + '/ned.datalist -1 0.00001 >> ' + main_dir + '/software/gridding/al_fl.datalist' 
+#echo "/media/sf_external_hd/al_fl/data/topo/ned/xyz/ned.datalist -1 0.00001" >> /media/sf_external_hd/al_fl/software/gridding/al_fl.datalist
+os.system(add_to_master_cmd)
+
 
