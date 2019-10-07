@@ -1,6 +1,6 @@
 #!/bin/sh
 function help () {
-echo "bag2tif2chunks2xyz.sh - A script that unzips any .gz and converts all .bag files in a directory to .tif files and then chunks and then converts to xyz."
+echo "tif2chunks2xyz.sh - A script that converts all tif files in a directory to smaller chunks and then to xyz."
 	echo "Usage: $0 chunk_dims resamp cellsize"
 	echo "* chunk_dims: <number of rows/columns per chunk in resamp resolution>"
 	echo "* resamp: <resample the tif, yes or no>"
@@ -8,41 +8,29 @@ echo "bag2tif2chunks2xyz.sh - A script that unzips any .gz and converts all .bag
 	0.0000102880663 = 1/27 arc-second
 	0.000030864199 = 1/9th arc-second 
 	0.000092592596 = 1/3rd arc-second
-	0.00027777777 = 1 arc-second"
+	1 = 1 arc-second"
 
 }
 
 if [ ${#@} == 3 ]; 
 then
 
+
 mkdir -p tif
 mkdir -p xyz
 
+#Example, create chunks 150 rows by 150 cols
 chunk_dim_x_int=$1
 chunk_dim_y_int=$1
 resamp_input=$2
 resamp_res=$3
 
-echo unzipping files
-for i in *.gz;
-do
-	echo "Unzipping" $i
-	gunzip $i
-done
-
-mkdir -p tif
-mkdir -p xyz
-
-#User inputs    	
-cellsize=$1
-
-#get count of bag files
-total_files=$(ls -1 | grep '\.bag$' | wc -l)
-echo "Total number of bag files to process:" $total_files
-echo Cellsize is $cellsize
+#get count of tif files
+total_files=$(ls -1 | grep '\.tif$' | wc -l)
+echo "Total number of tif files to process:" $total_files
 
 file_num=1
-for i in *.bag;
+for i in *.tif;
 do
 	echo "Processing File" $file_num "out of" $total_files
 	echo "Processing" $i
@@ -52,23 +40,18 @@ do
 		echo -- Resampling to target resolution
 		#exit 1
 		gdalwarp $i -dstnodata -999999 -r cubicspline -tr $resamp_res $resamp_res -t_srs EPSG:4269 $(basename $i .tif)"_resamp.tif" -overwrite
-		input_file=$(basename $i .tif)"_resamp.tif"
-		echo input_file is $input_file
 	else
 		echo -- Keeping orig resolution
-		input_file=${i}
-		echo input_file is $input_file
+		#exit 1
+		cp $i $(basename $i .tif)"_resamp.tif"
 	fi
 
-	x_dim=`gdalinfo $input_file | grep -e "Size is" | awk '{print $3}' | sed 's/.$//'`
-	y_dim=`gdalinfo $input_file | grep -e "Size is" | awk '{print $4}'`
-	echo x_dim is $x_dim
-	echo y_dim is $y_dim
-
+	#get input grid dimensions
+	x_dim=`gdalinfo $(basename $i .tif)"_resamp.tif" | grep -e "Size is" | awk '{print $3}' | sed 's/.$//'`
+	y_dim=`gdalinfo $(basename $i .tif)"_resamp.tif" | grep -e "Size is" | awk '{print $4}'`
+	
 	echo chunk x_dim is $chunk_dim_x_int
 	echo chunk y_dim is $chunk_dim_y_int
-
-	#exit 1
 
 	echo
 	echo -- Starting Chunk Analysis
@@ -78,37 +61,22 @@ do
 	chunk_name="1"
 	#remove file extension to get basename from input file
 	input_name=${i::-4}
-	#starting point for chunks
+	#starting point for tiling
 	xoff=0
 	yoff=0
 
 	while [ "$(bc <<< "$xoff < $x_dim")" == "1"  ]; do
 	    yoff=0
 	    while [ "$(bc <<< "$yoff < $y_dim")" == "1"  ]; do
-	    chunk_name_full_tmp=$input_name"_chunk_"$chunk_name"_tmp.tif"
-	    chunk_name_full_tmp2=$input_name"_chunk_"$chunk_name"_tmp2.tif"
 	    chunk_name_full=$input_name"_chunk_"$chunk_name".tif"
 	    echo creating chunk $chunk_name_full
 	    echo xoff is $xoff
 	    echo yoff is $yoff
 	    echo chunk_dim_x_int is $chunk_dim_x_int
-	    echo chunk_dim_y_int is $chunk_dim_y_int
-	    if [ "$resamp_input" == "yes" ];
-	    then
-			echo -- Already converted to target coord system, chunking...
-			gdal_translate -of GTiff -srcwin $xoff $yoff $chunk_dim_x_int $chunk_dim_y_int $input_file $chunk_name_full -stats
-		
-		else
-			echo -- Chunking, and then converting to target coord system 
-			gdal_translate -b 1 -of GTiff -srcwin $xoff $yoff $chunk_dim_x_int $chunk_dim_y_int $input_file $chunk_name_full_tmp
-			gdalwarp $chunk_name_full_tmp -dstnodata -999999 -t_srs EPSG:4269 $chunk_name_full_tmp2
-			echo -- Re-Calculating Stats
-			gdal_translate -stats $chunk_name_full_tmp2 $chunk_name_full
-
-			rm $chunk_name_full_tmp
-		    rm $chunk_name_full_tmp2
-	 	fi
-
+	    echo chunk_dim_y_int $chunk_dim_y_int
+	    gdal_translate -of GTiff -srcwin $xoff $yoff $chunk_dim_x_int $chunk_dim_y_int $(basename $i .tif)"_resamp.tif" $chunk_name_full -stats
+	    
+	    valid_check=
 	    valid_check=`gdalinfo $chunk_name_full | grep -e "STATISTICS_MAXIMUM"`
 	    echo "Valid check is" $valid_check
 	    #exit 1
@@ -117,8 +85,6 @@ do
 		then
 		      echo "chunk has no data, deleting..."
 		      rm $chunk_name_full
-		      #rm $chunk_name_full_tmp
-		      #rm $chunk_name_full_tmp2
 		else
 		      echo "chunk has data, keeping..."
 		      echo -- Converting to xyz
@@ -135,8 +101,7 @@ do
 	  xoff=$(echo "$xoff+$chunk_dim_x_int" | bc)
 	done
 	file_num=$((file_num + 1))
-	#delete resampled file if it exists
-	[ -e $(basename $i .tif)"_resamp.tif" ] && rm $(basename $i .tif)"_resamp.tif"
+	rm $(basename $i .tif)"_resamp.tif"
 	echo
 	echo
 done
